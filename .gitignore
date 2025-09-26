@@ -1,0 +1,8 @@
+# Ignore executables
+*/problem*
+
+# Ignore VS Code settings (optional, unless you want to share them)
+.vscode/
+
+# Ignore build artifacts
+*.o
