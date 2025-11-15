@@ -10,13 +10,16 @@ int main() {
 }
 
 int minOperations(string s) {
-    int count_0 = 0, count_1 = 0;
-    for (size_t i = 0; i < s.length() ; i++) {
-        if (s[i] == '0')    count_0++;
-        else    count_1++;
+    int length = s.length();
+    char s1[length];
+    int count1 = 0, count2 = 0;
+    for (int i = 0; i < length; i++) {
+        if (i%2)    s1[i] = '0';
+        else s1[i] = '1';
     }
-    int differences = count_0 - count_1;
-    if (differences < 0) differences = -differences;
-
-    return differences / 2;
+    for (int i = 0; i < length; i++) {
+        if (s[i] != s1[i]) count2++;
+        else    count1++;
+    }
+    return min(count1, count2);
 }
