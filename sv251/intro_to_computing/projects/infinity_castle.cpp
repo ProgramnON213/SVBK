@@ -32,9 +32,10 @@ int main() {
 
     cout << "[Scene 4] ";
     finalHP = bossHP - totalDamage;
-    if (finalHP <= 0)   cout << "Boss defeated! (finalHP = 0)";
-    else if (specialMoveReady == 1 && finalHP <= 50)    cout << "Use special move to finish! (finalHP = " << setprecision(1) << fixed << finalHP << ")";
-    else cout << "Withdraw to heal." << setprecision(1) << fixed << finalHP << ")";
-    cout << endl;
+    if (finalHP <= 0)   cout << "Boss defeated!";
+    else if (specialMoveReady == 1 && finalHP <= 50)    cout << "Use special move to finish!";
+    else cout << "Withdraw to heal.";
+    if (finalHP < 0)    finalHP = 0;
+    cout << " (finalHP = " << finalHP << ")" << endl;
 
 }
