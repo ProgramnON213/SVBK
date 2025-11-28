@@ -1,101 +1,142 @@
 from manim import *
+import numpy as np
 
-class AccelerationData(Scene):
+# ------------------------------------------------------------
+# ACCELERATION DATA FROM THE TABLE
+# ------------------------------------------------------------
+accel_data = [
+    (0, 0.0),
+    (1, 0.3),
+    (2, 2.1),
+    (3, 5.0),
+    (4, 6.5),
+    (5, 4.7),
+    (6, 0.0),
+]
+
+# Fit a parabola through 3 points (used for Simpson subintervals)
+def parabola_through(p1, p2, p3):
+    xs = np.array([p1[0], p2[0], p3[0]])
+    ys = np.array([p1[1], p2[1], p3[1]])
+
+    A = np.array([
+        [xs[0] ** 2, xs[0], 1],
+        [xs[1] ** 2, xs[1], 1],
+        [xs[2] ** 2, xs[2], 1],
+    ])
+    try:
+        a, b, c = np.linalg.solve(A, ys)
+        return lambda x: a * x ** 2 + b * x + c
+    except np.linalg.LinAlgError:
+        return lambda x: 0
+
+class SimpsonAcceleration(Scene):
     def construct(self):
-        # Axes
-        axes = Axes(
+        # -----------------------------
+        # AXES AND TITLE
+        # -----------------------------
+        title = Tex("Simpson's Rule: Increase in Velocity").to_edge(UP)
+
+        ax = Axes(
             x_range=[0, 7, 1],
-            y_range=[0, 8, 1],
-            x_length=6,
-            y_length=6,
-            axis_config={"include_numbers": True},
-        )
-        labels = axes.get_axis_labels(x_label="\\text{Time (s)}", y_label="a\\,(m/s^2)")
-        self.play(Create(axes), Write(labels))
+            y_range=[0, 7, 1],
+            x_length=10,
+            y_length=5,
+            axis_config={"color": BLUE},
+        ).add_coordinates()
+
+        axis_labels = ax.get_axis_labels("t (s)", Tex("a(t)"))
+
+        graph_group = VGroup(ax, axis_labels).shift(DOWN * 0.5)
+
+        # -----------------------------
+        # GRAPH OF a(t)
+        # -----------------------------
+        acceleration_graph = VMobject().set_points_smoothly(
+            [ax.c2p(t, a) for t, a in accel_data]
+        ).set_color(RED)
+
+        data_dots = VGroup(*[
+            Dot(ax.c2p(t, a), color=YELLOW)
+            for t, a in accel_data
+        ])
+
+        self.play(Write(title))
+        self.play(Create(ax), Write(axis_labels))
+        self.play(Create(acceleration_graph), run_time=2)
+        self.play(LaggedStart(*[
+            FadeIn(dot, scale=0.6) for dot in data_dots
+        ], lag_ratio=0.1))
         self.wait(0.5)
 
-        # Data points (time, acceleration)
-        data = [
-            (0, 0),
-            (1, 0.3),
-            (2, 2.1),
-            (3, 5.0),
-            (4, 6.5),
-            (5, 4.7),
-            (6, 0)
-        ]
+        # -----------------------------
+        # SHOW Δt
+        # -----------------------------
+        dt_text = MathTex(
+            r"\Delta t = 1\ \text{second}",
+            font_size=40
+        ).move_to(ax.c2p(4, 7.5))
+        dt_text.add_background_rectangle(opacity=0.7)
 
-        # Plot points
-        dots = VGroup(*[
-            Dot(axes.c2p(x, y), color=YELLOW)
-            for x, y in data
-        ])
-        self.play(LaggedStartMap(FadeIn, dots, lag_ratio=0.1))
+        self.play(Write(dt_text))
         self.wait(0.5)
 
-        # Label each point with coordinates
-        labels = VGroup(*[
-            MathTex(f"({x}, {y})").scale(0.5).next_to(axes.c2p(x, y), UP)
-            for x, y in data
-        ])
-        self.play(LaggedStartMap(Write, labels, lag_ratio=0.1))
+        # -----------------------------
+        # TRANSFORM TO "Approximate with parabolas"
+        # -----------------------------
+        approx_text = Tex(
+            "Approximate with parabolas",
+            font_size=40
+        ).move_to(dt_text.get_center())
+        approx_text.add_background_rectangle(opacity=0.7)
+
+        self.play(Transform(dt_text, approx_text))
+        self.wait(0.5)
+
+        # -----------------------------
+        # DRAW SIMPSON SUBINTERVAL PARABOLAS
+        # -----------------------------
+        parabola_shapes = VGroup()
+
+        for i in range(0, len(accel_data) - 2, 2):
+            p1, p2, p3 = accel_data[i], accel_data[i + 1], accel_data[i + 2]
+            f = parabola_through(p1, p2, p3)
+
+            parabola_graph = ax.plot(
+                f,
+                x_range=[p1[0], p3[0]],
+                color=YELLOW
+            )
+            area = ax.get_area(
+                parabola_graph,
+                x_range=[p1[0], p3[0]],
+                color=YELLOW,
+                opacity=0.5
+            )
+
+            self.play(Create(parabola_graph), FadeIn(area), run_time=0.5)
+            parabola_shapes.add(parabola_graph, area)
+
         self.wait(1)
-        self.play(FadeOut(labels))
 
-        # --- Parabola through first 3 points ---
-        pts = data[:3]
-        x_vals, y_vals = zip(*pts)
+        self.play(FadeOut(VGroup(parabola_shapes, dt_text, acceleration_graph, data_dots)))
+        self.play(FadeOut(VGroup(ax, axis_labels, title)))
+        self.wait(0.5)
 
-        # Solve for a, b, c in y = a*x^2 + b*x + c
-        A = np.array([[x**2, x, 1] for x in x_vals])
-        B = np.array(y_vals)
-        a, b, c = np.linalg.solve(A, B)
-
-        # Define the fitted quadratic
-        def parabola(x):
-            return a*x**2 + b*x + c
-
-        # Plot only between x=0 and x=2
-        curve = axes.plot(parabola, x_range=[0, 2], color=WHITE, stroke_width=1)
-        self.play(Create(curve), run_time=2)
-        area = axes.get_area(curve, x_range=[0, 2], color=BLUE, opacity=0.4)
-        self.play(FadeIn(area), run_time=2)
-        self.wait(1)
+        # -----------------------------
+        # SHOW CALCULATION STEPS
+        # -----------------------------
+        calc_title = Tex("Calculation")
+        calc_text = MathTex(
+            r"\int_0^{6} a(t)\,dt \approx \frac{1}{3}\left[ a_0 + 4a_1 + 2a_2 + 4a_3 + 2a_4 + 4a_5 + a_6 \right] \\[4pt]",
+            r"\approx \frac{1}{3} \left[ 0 + 4(0.3) + 2(2.1) + 4(5.0) + 2(6.5) + 4(4.7) + 0 \right] \\[4pt]",
+            r"= \frac{1}{3}(57.0) \\[4pt]",
+            r"\approx 19.1\ \text{m/s}",
+            font_size=36
+        ).arrange(DOWN, aligned_edge=LEFT)
         
-        # --- Parabola through points 2 to 4 ---
-        pts2 = data[2:5]
-        x_vals2, y_vals2 = zip(*pts2)
+        calc_group = VGroup(calc_title, calc_text).arrange(DOWN, buff=0.5)
+        calc_group.to_corner(UL, buff=0.7)
 
-        A2 = np.array([[x**2, x, 1] for x in x_vals2])
-        B2 = np.array(y_vals2)
-        a2, b2, c2 = np.linalg.solve(A2, B2)
-
-        def parabola2(x):
-            return a2*x**2 + b2*x + c2
-
-        # --- Parabola through points 2 to 4 ---
-        curve2 = axes.plot(parabola2, x_range=[2, 4], color=WHITE, stroke_width=1)
-        self.play(Create(curve2), run_time=2)
-        area2 = axes.get_area(curve2, x_range=[2, 4], color=BLUE, opacity=0.4)
-        self.play(FadeIn(area2), run_time=2)
-        self.wait(1)
-
-        # --- Parabola through points 4 to 6 ---
-        pts3 = data[4:]
-        x_vals3, y_vals3 = zip(*pts3)
-
-        A3 = np.array([[x**2, x, 1] for x in x_vals3])
-        B3 = np.array(y_vals3)
-        a3, b3, c3 = np.linalg.solve(A3, B3)
-
-        def parabola3(x):
-            return a3*x**2 + b3*x + c3
-
-        # --- Parabola through points 4 to 6 ---
-        curve3 = axes.plot(parabola3, x_range=[4, 6], color=WHITE, stroke_width=1)
-        self.play(Create(curve3), run_time=2)
-        area3 = axes.get_area(curve3, x_range=[4, 6], color=BLUE, opacity=0.4)
-        self.play(FadeIn(area3), run_time=2)
-        self.wait(1)
-
-        self.wait(3)
+        self.play(Write(calc_group, run_time=8))
+        self.wait(5)
