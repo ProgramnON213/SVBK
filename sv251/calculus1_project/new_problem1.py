@@ -52,9 +52,6 @@ class SimpsonSpeed(Scene):
         # -----------------------------
         # GRAPH OF a(t)
         # -----------------------------
-        speed_graph = VMobject().set_points_smoothly(
-            [ax.c2p(t, a) for t, a in speed_data]
-        ).set_color(RED)
 
         data_dots = VGroup(*[
             Dot(ax.c2p(t, a), color=YELLOW)
@@ -63,7 +60,6 @@ class SimpsonSpeed(Scene):
 
         self.play(Write(title))
         self.play(Create(ax), Write(axis_labels))
-        self.play(Create(speed_graph), run_time=2)
         self.play(LaggedStart(*[
             FadeIn(dot, scale=0.6) for dot in data_dots
         ], lag_ratio=0.1))
@@ -120,7 +116,7 @@ class SimpsonSpeed(Scene):
 
         self.wait(1)
 
-        self.play(FadeOut(VGroup(parabola_shapes, speed_graph, data_dots)))
+        self.play(FadeOut(VGroup(parabola_shapes, data_dots)))
         self.play(FadeOut(VGroup(ax, axis_labels, title)))
         self.wait(0.5)
 
@@ -139,4 +135,4 @@ class SimpsonSpeed(Scene):
         calc_group.to_corner(UL, buff=0.7)
 
         self.play(Write(calc_group, run_time=8))
-        self.wait(5)
+        self.wait(3)
