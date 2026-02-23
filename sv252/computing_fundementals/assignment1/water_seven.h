@@ -51,6 +51,9 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
 int analyzeDangerLimit(int grid[MAX_GRID][MAX_GRID], int rows, int cols);
 bool evaluateRoute(int grid[MAX_GRID][MAX_GRID], int rows, int cols, int dangerLimit);
 
+// Helper
+int find_names(char characters[FIXED_CHARACTER][MAX_NAME], string target);
+
 ////////////////////////////////////////////////
 /// END OF STUDENT'S ANSWER
 ////////////////////////////////////////////////

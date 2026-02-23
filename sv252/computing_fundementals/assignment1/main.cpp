@@ -15,5 +15,15 @@ using namespace std;
 
 
 int main(int argc, const char * argv[]) {
+    char character[FIXED_CHARACTER][MAX_NAME];
+    int hp[FIXED_CHARACTER];
+    int skill[FIXED_CHARACTER];
+    int shipHP;
+    int repairCost;
+    readInput("opw_tc_01_input", character, hp, skill, shipHP, repairCost);
+    cout << shipHP << " " << repairCost << endl;
+    for (int i = 0; i < FIXED_CHARACTER; i++) {
+        cout << character[i] << "/" << hp[i] << "/" << skill[i] << endl;
+    }
     return 0;
 }
