@@ -62,9 +62,9 @@ void resolveDuel(
         //TODO: Output assign to duel parameter
         int luffy_idx = find_names(character, "LUFFY");
         int usopp_idx = find_names(character, "USOPP");
-        double u = (skill[usopp_idx] + conflictIndex/20.0 + repairCost/500.0);
+        int u = ceil(skill[usopp_idx] + conflictIndex/20.0 + repairCost/500.0);
         if (skill[luffy_idx] >= u) {return;}
-        double sum_to_reach = u - skill[luffy_idx];
+        int sum_to_reach = u - skill[luffy_idx];
         char other_character[FIXED_CHARACTER-2][MAX_NAME];
         int other_cost[FIXED_CHARACTER-2];
         int other_skill[FIXED_CHARACTER-2];
@@ -72,6 +72,9 @@ void resolveDuel(
         for (int i = 0; i < FIXED_CHARACTER-2; i++) {
             cout << other_character[i] << "/" << other_skill[i] << "/" << other_cost[i] << endl;
         }
+        // TODO: Find the idxes needed, put it in an array
+        // The idxes should be refer to the other_character arrays 
+        // using other_character and add the sorted array to duel
     }
 
 // Task 4
@@ -79,6 +82,30 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
     int hp[FIXED_CHARACTER], int skill[FIXED_CHARACTER], int conflictIndex, 
     int repairCost, char cipherText[], char resultText[]){
         //TODO: Output assign to resultText parameter
+        int idx = 0, sum = 0;
+        while (cipherText[idx] != '#') {
+            sum += cipherText[idx];
+            idx++;
+        }
+        int xy = (cipherText[idx+1]-48)*10 + cipherText[idx+2]-48;
+        if (sum%100 == xy) {resultText = {};}
+        else {
+            int key = (conflictIndex+repairCost) % 26;
+            int block_length = (key%5) + 4;
+            int number_of_blocks = ceil((float)idx/block_length);
+            char blocks[number_of_blocks][block_length];
+            
+            idx = 0;
+            while (cipherText[idx] != '#') {
+                blocks[idx/block_length][block_length - idx%block_length - 1] = caesarChar(cipherText[idx], -key);
+                idx++;
+            }
+            for (int i = 0; i < number_of_blocks-1; i++) {
+                for (int j = 0; j < block_length; j++) {
+                    cipherText[i*block_length+j] = blocks[i][j];
+                }
+            }
+        }
     }
 
 // Task 5
@@ -157,6 +184,25 @@ void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME],
             }
         }
     return;
+}
+
+char caesarChar(char c, int key) {
+    if (47 < c && c < 58) {
+         c += key;
+         if (c < 48)    c += 10;
+         else if (c > 57)   c -= 10;
+    }
+    else if (64 < c && c < 91) {
+        c += key;
+        if (c < 65)     c += 26;
+        else if (c > 90)    c -= 26;
+    }
+    else if (96 < c && c < 123) {
+        c += key;
+        if (c < 97)     c += 26;
+        else if (c > 122)   c -= 26;
+    }
+    return c;
 }
 
 

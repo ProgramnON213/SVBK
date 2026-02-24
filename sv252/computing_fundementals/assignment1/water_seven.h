@@ -59,6 +59,7 @@ void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME],
     int skill[FIXED_CHARACTER], int hp[FIXED_CHARACTER],
     char other_character[FIXED_CHARACTER-2][MAX_NAME], int other_skill[FIXED_CHARACTER-2], 
     int other_cost[FIXED_CHARACTER-2], int luffy_idx,  int usopp_idx);
+char caesarChar(char c, int key);
 
 
 ////////////////////////////////////////////////

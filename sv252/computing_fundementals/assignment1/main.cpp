@@ -21,14 +21,16 @@ int main(int argc, const char * argv[]) {
     int shipHP;
     int repairCost;
     readInput("opw_tc_01_input", character, hp, skill, shipHP, repairCost);
-    cout << shipHP << " " << repairCost << endl;
+//    cout << shipHP << " " << repairCost << endl;
 //    for (int i = 0; i < FIXED_CHARACTER; i++) {
 //        cout << character[i] << "/" << hp[i] << "/" << skill[i] << endl;
 //    }
     repairCost = damageEvaluation(shipHP, repairCost);
-    cout << repairCost << endl;
+//    cout << repairCost << endl;
     int conflictIndex = conflictSimulation(character, hp, skill, shipHP, repairCost);
     char duel[FIXED_CHARACTER][MAX_NAME];
     resolveDuel(character, hp, skill, conflictIndex, repairCost, duel);
+    char cipherText[] = {'A', 'Q', ' ', '7', 'X', 'K', 'U', '3', 'P', '#', '0', '3'};
+    decodeCP9Message(character, hp, skill, 120, 1500, cipherText, {});
     return 0;
 }
