@@ -88,31 +88,28 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
             idx++;
         }
         int xy = (cipherText[idx+1]-48)*10 + cipherText[idx+2]-48;
-        if (sum%100 == xy) {resultText = {};}
+        if (sum%100 != xy) {resultText = {};}
         else {
             int key = (conflictIndex+repairCost) % 26;
             int block_length = (key%5) + 4;
-            int number_of_blocks = ceil((float)idx/block_length);
-            char blocks[number_of_blocks][block_length];
-            
-            idx = 0;
-            while (cipherText[idx] != '#') {
-                blocks[idx/block_length][block_length - idx%block_length - 1] = caesarChar(cipherText[idx], -key);
-                idx++;
-            }
-            int temp = 0;
-            for (int i = 0; i < number_of_blocks-1; i++) {
-                for (int j = 0; j < block_length; j++) {
-                    resultText[i*block_length+j] = blocks[i][j];
-                    temp += 1;
+            int block = 1;
+            int result_idx = 0;
+            bool is_stopped = false;
+            while (!is_stopped) {
+                int start = block*block_length-1;
+                int end = (block-1)*block_length-1;
+                if (start >= idx) {
+                    is_stopped = true;
+                    start = idx - 1;
                 }
-            }
-            for (int i = idx%number_of_blocks; i < block_length; i++) {
-                resultText[temp] = blocks[number_of_blocks][i];
-                temp++;
-            }
-            for (int i = 0; i < temp; i++) {
-                cout << resultText[i] << "/";
+                for (int i = start; i > end; i--) {
+                    resultText[result_idx] = caesarChar(cipherText[i], -key);
+                    result_idx++;
+                }
+                resultText[result_idx+1] = '\0';
+                // TODO
+                // Find "CP9" or "ENIESLOBBY" (case insensitive) and add _TRUE or _FALSE to the end
+                block++;
             }
         }
     }

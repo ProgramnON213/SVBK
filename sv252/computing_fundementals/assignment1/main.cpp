@@ -30,7 +30,9 @@ int main(int argc, const char * argv[]) {
     int conflictIndex = conflictSimulation(character, hp, skill, shipHP, repairCost);
     char duel[FIXED_CHARACTER][MAX_NAME];
     resolveDuel(character, hp, skill, conflictIndex, repairCost, duel);
-    char cipherText[] = {'A', 'Q', ' ', '7', 'X', 'K', 'U', '3', 'P', '#', '0', '3'};
-    decodeCP9Message(character, hp, skill, 120, 1500, cipherText, cipherText);
+    char cipherText[] = "AQ 7XK#96";
+    char resultText[] = "                                             Inknki";
+    decodeCP9Message(character, hp, skill, 120, 1500, cipherText, resultText);
+    cout << resultText << endl;
     return 0;
 }
