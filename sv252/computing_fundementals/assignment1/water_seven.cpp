@@ -37,18 +37,22 @@ bool readInput(
         return false;
 }
 
-
-
 // Task 1
 int damageEvaluation(int shipHP, int repairCost){
-    return 0;
+    if (shipHP < 455 && is_sum_of_digit_perfect(shipHP)) {
+        repairCost = ceil(repairCost*1.5);
+    }
+    return repairCost;
 }
 
 // Task 2
 int conflictSimulation(
     char character[FIXED_CHARACTER][MAX_NAME], int hp[FIXED_CHARACTER], int skill[FIXED_CHARACTER],
     int shipHP, int repairCost){
-        return 0;
+        int luffy_idx = find_names(character, "LUFFY");
+        int usopp_idx = find_names(character, "USOPP");
+        int conflictIndex = round(skill[luffy_idx] - skill[usopp_idx] + repairCost/100.0 + (500-shipHP)/50.0);
+        return repeatingConflictSimulation(conflictIndex);
     }
 
 // Task 3
@@ -56,6 +60,18 @@ void resolveDuel(
     char character[FIXED_CHARACTER][MAX_NAME], int hp[FIXED_CHARACTER], int skill[FIXED_CHARACTER],
     int conflictIndex, int repairCost, char duel[FIXED_CHARACTER][MAX_NAME]){
         //TODO: Output assign to duel parameter
+        int luffy_idx = find_names(character, "LUFFY");
+        int usopp_idx = find_names(character, "USOPP");
+        double u = (skill[usopp_idx] + conflictIndex/20.0 + repairCost/500.0);
+        if (skill[luffy_idx] >= u) {return;}
+        double sum_to_reach = u - skill[luffy_idx];
+        char other_character[FIXED_CHARACTER-2][MAX_NAME];
+        int other_cost[FIXED_CHARACTER-2];
+        int other_skill[FIXED_CHARACTER-2];
+        set_other_character_stat(character, skill, hp, other_character, other_skill, other_cost, luffy_idx, usopp_idx);
+        for (int i = 0; i < FIXED_CHARACTER-2; i++) {
+            cout << other_character[i] << "/" << other_skill[i] << "/" << other_cost[i] << endl;
+        }
     }
 
 // Task 4
@@ -84,6 +100,63 @@ int find_names(char characters[FIXED_CHARACTER][MAX_NAME], string target) {
         if (characters[i] == target) {return i;}
     }
     return -1;
+}
+
+// Check if the sum of digit is the first 2 perfect numbers
+bool is_sum_of_digit_perfect(int n) {
+    int sum = 0;
+    while (n > 0) {
+        sum += n%10;
+        n /= 10;
+    }
+    return (sum == 6 || sum == 28);
+}
+
+// Repeated conflict simulation
+int repeatingConflictSimulation(int conflictIndex) {
+    int count = 0;
+    while (conflictIndex < 255 && count < 10) {
+        int id = conflictIndex % 6;
+        switch (id)
+        {
+        case 0:
+            conflictIndex += 255;
+            break;
+        case 1:
+            conflictIndex += 20;
+            break;
+        case 2:
+            conflictIndex += 50;
+            break;
+        case 3:
+            conflictIndex += 70;
+            break;
+        case 4:
+            conflictIndex += 90;
+            break;
+        case 5:
+            conflictIndex += 100;
+            break;
+        }
+        count += 1;
+    }
+    return conflictIndex;
+}
+
+void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME], 
+    int skill[FIXED_CHARACTER], int hp[FIXED_CHARACTER],
+    char other_character[FIXED_CHARACTER-2][MAX_NAME], int other_skill[FIXED_CHARACTER-2], 
+    int other_cost[FIXED_CHARACTER-2], int luffy_idx,  int usopp_idx) {
+        int idx = 0;
+        for (int i = 0; i < FIXED_CHARACTER; i++) {
+            if (i != luffy_idx && i != usopp_idx) {
+                strcpy(other_character[idx], character[i]);
+                other_skill[idx] = skill[i];
+                other_cost[idx] = hp[i] % 10 + 1;
+                idx++;
+            }
+        }
+    return;
 }
 
 

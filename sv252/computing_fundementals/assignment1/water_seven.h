@@ -53,6 +53,13 @@ bool evaluateRoute(int grid[MAX_GRID][MAX_GRID], int rows, int cols, int dangerL
 
 // Helper
 int find_names(char characters[FIXED_CHARACTER][MAX_NAME], string target);
+bool is_sum_of_digit_perfect(int n);
+int repeatingConflictSimulation(int conflictIndex);
+void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME], 
+    int skill[FIXED_CHARACTER], int hp[FIXED_CHARACTER],
+    char other_character[FIXED_CHARACTER-2][MAX_NAME], int other_skill[FIXED_CHARACTER-2], 
+    int other_cost[FIXED_CHARACTER-2], int luffy_idx,  int usopp_idx);
+
 
 ////////////////////////////////////////////////
 /// END OF STUDENT'S ANSWER

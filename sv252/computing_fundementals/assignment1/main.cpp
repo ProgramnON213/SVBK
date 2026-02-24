@@ -22,8 +22,13 @@ int main(int argc, const char * argv[]) {
     int repairCost;
     readInput("opw_tc_01_input", character, hp, skill, shipHP, repairCost);
     cout << shipHP << " " << repairCost << endl;
-    for (int i = 0; i < FIXED_CHARACTER; i++) {
-        cout << character[i] << "/" << hp[i] << "/" << skill[i] << endl;
-    }
+//    for (int i = 0; i < FIXED_CHARACTER; i++) {
+//        cout << character[i] << "/" << hp[i] << "/" << skill[i] << endl;
+//    }
+    repairCost = damageEvaluation(shipHP, repairCost);
+    cout << repairCost << endl;
+    int conflictIndex = conflictSimulation(character, hp, skill, shipHP, repairCost);
+    char duel[FIXED_CHARACTER][MAX_NAME];
+    resolveDuel(character, hp, skill, conflictIndex, repairCost, duel);
     return 0;
 }
