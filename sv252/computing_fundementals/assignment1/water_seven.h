@@ -27,8 +27,6 @@ bool readInput(
     char character[FIXED_CHARACTER][MAX_NAME], int hp[FIXED_CHARACTER], 
     int skill[FIXED_CHARACTER], int &shipHP, int &repairCost);
 
-
-
 // Task 1
 int damageEvaluation(int shipHP, int repairCost);
 

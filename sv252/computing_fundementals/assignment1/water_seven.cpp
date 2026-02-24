@@ -100,10 +100,19 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
                 blocks[idx/block_length][block_length - idx%block_length - 1] = caesarChar(cipherText[idx], -key);
                 idx++;
             }
+            int temp = 0;
             for (int i = 0; i < number_of_blocks-1; i++) {
                 for (int j = 0; j < block_length; j++) {
-                    cipherText[i*block_length+j] = blocks[i][j];
+                    resultText[i*block_length+j] = blocks[i][j];
+                    temp += 1;
                 }
+            }
+            for (int i = idx%number_of_blocks; i < block_length; i++) {
+                resultText[temp] = blocks[number_of_blocks][i];
+                temp++;
+            }
+            for (int i = 0; i < temp; i++) {
+                cout << resultText[i] << "/";
             }
         }
     }
