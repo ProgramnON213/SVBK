@@ -31,7 +31,7 @@ int main(int argc, const char * argv[]) {
     char duel[FIXED_CHARACTER][MAX_NAME];
     resolveDuel(character, hp, skill, conflictIndex, repairCost, duel);
     char cipherText[] = "AQ 7XK#96";
-    char resultText[] = "                                             Inknki";
+    char resultText[] = "                             ";
     decodeCP9Message(character, hp, skill, 120, 1500, cipherText, resultText);
     cout << resultText << endl;
     return 0;

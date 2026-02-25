@@ -83,7 +83,7 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
     int repairCost, char cipherText[], char resultText[]){
         //TODO: Output assign to resultText parameter
         int idx = 0, sum = 0;
-        while (cipherText[idx] != '#') {
+        while (cipherText[idx+3] != '\0') {
             sum += cipherText[idx];
             idx++;
         }
@@ -106,22 +106,56 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
                     resultText[result_idx] = caesarChar(cipherText[i], -key);
                     result_idx++;
                 }
-                resultText[result_idx+1] = '\0';
-                // TODO
-                // Find "CP9" or "ENIESLOBBY" (case insensitive) and add _TRUE or _FALSE to the end
                 block++;
             }
+            resultText[result_idx] = '\0';
+            char tempText[result_idx+100];
+            strcpy(tempText, resultText);
+            string strText = resultText;
+            if (uppercase_and_find(tempText, result_idx+100, KEYWORDS_1) || uppercase_and_find(tempText, result_idx+100, KEYWORDS_2)) {
+                strText += "_TRUE";
+            }
+            else {strText += "_FALSE";}
+            strncpy(resultText, strText.c_str(), sizeof(strText));
         }
     }
 
 // Task 5
 int analyzeDangerLimit(int grid[MAX_GRID][MAX_GRID], int rows, int cols){
-    return 0;
+    int maxRowSum = 0, maxCell = 0;
+    for (int i = 0; i < rows; i++) {
+        int rowSum = 0;
+        for (int j = 0; j < cols; j++) {
+            if (grid[i][j] >= 0) rowSum += grid[i][j];
+            if (grid[i][j] > maxCell)   maxCell = grid[i][j];
+        }
+        if (rowSum > maxRowSum) maxRowSum = rowSum;
+    }
+    return maxRowSum + maxCell;
 }
 
 
 bool evaluateRoute(int grid[MAX_GRID][MAX_GRID], int rows, int cols, int dangerLimit){
-    return false;
+    if (rows == 1 && cols == 1) {
+        return (!(grid[0][0] == -1 && grid[0][0] > dangerLimit));
+    }
+    if (grid[0][0] == -1 || grid[rows-1][cols-1] == -1) {return false;}
+
+    for (int j = 1; j < cols; j++) {
+        if (grid[0][j] == -1)   {grid[0][j] = dangerLimit+1;}
+        else grid[0][j] += grid[0][j-1];
+    }
+    for (int i = 1; i < rows; i++) {
+        if (grid[i][0] == -1)   {grid[i][0] = dangerLimit+1;}
+        else grid[i][0] += grid[i-1][0];
+    }
+    for (int i = 1; i < rows; i++) {
+        for (int j = 1; j < cols; j++) {
+            if (grid[i][j] == -1)   grid[i][j] = dangerLimit+1;
+            else grid[i][j] += min(grid[i-1][j], grid[i][j-1]);
+        }
+    }
+    return grid[rows-1][cols-1] <= dangerLimit;
 }
 
 
@@ -209,6 +243,16 @@ char caesarChar(char c, int key) {
         else if (c > 122)   c -= 26;
     }
     return c;
+}
+
+bool uppercase_and_find(char input[], int input_length, const char target[]) {
+    for (int i = 0; i < input_length; i++) {
+        if (input[i] >= 97 && input[i] <= 122) {
+            input[i] -= 32;
+        }
+    }
+    char* pos = strstr(input, target);
+    return (pos);
 }
 
 

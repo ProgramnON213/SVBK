@@ -41,6 +41,8 @@ void resolveDuel(
     int conflictIndex, int repairCost, char duel[FIXED_CHARACTER][MAX_NAME]);
 
 // Task 4
+const char KEYWORDS_1[] = "CP9";
+const char KEYWORDS_2[] = "ENIESLOBBY"; 
 void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME], 
     int hp[FIXED_CHARACTER], int skill[FIXED_CHARACTER], int conflictIndex, 
     int repairCost, char cipherText[], char resultText[]);
@@ -58,7 +60,7 @@ void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME],
     char other_character[FIXED_CHARACTER-2][MAX_NAME], int other_skill[FIXED_CHARACTER-2], 
     int other_cost[FIXED_CHARACTER-2], int luffy_idx,  int usopp_idx);
 char caesarChar(char c, int key);
-
+bool uppercase_and_find(char input[], int input_length, const char target[]);
 
 ////////////////////////////////////////////////
 /// END OF STUDENT'S ANSWER
