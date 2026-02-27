@@ -63,7 +63,6 @@ void resolveDuel(
         int luffy_idx = find_names(character, "LUFFY");
         int usopp_idx = find_names(character, "USOPP");
         int u = ceil(skill[usopp_idx] + conflictIndex/20.0 + repairCost/500.0);
-        if (skill[luffy_idx] >= u) {return;}
         int sum_to_reach = u - skill[luffy_idx];
         char other_character[FIXED_CHARACTER-2][MAX_NAME];
         int other_cost[FIXED_CHARACTER-2];
@@ -82,37 +81,40 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
             sum += cipherText[idx];
             idx++;
         }
+
         int xy = (cipherText[idx+1]-48)*10 + cipherText[idx+2]-48;
-        if (sum%100 != xy) {resultText = {};}
-        else {
-            int key = (conflictIndex+repairCost) % 26;
-            int block_length = (key%5) + 4;
-            int block = 1;
-            int result_idx = 0;
-            bool is_stopped = false;
-            while (!is_stopped) {
-                int start = block*block_length-1;
-                int end = (block-1)*block_length-1;
-                if (start >= idx) {
-                    is_stopped = true;
-                    start = idx - 1;
-                }
-                for (int i = start; i > end; i--) {
-                    resultText[result_idx] = caesarChar(cipherText[i], -key);
-                    result_idx++;
-                }
-                block++;
-            }
-            resultText[result_idx] = '\0';
-            char tempText[result_idx+100];
-            strcpy(tempText, resultText);
-            string strText = resultText;
-            if (uppercase_and_find(tempText, result_idx+100, KEYWORDS_1) || uppercase_and_find(tempText, result_idx+100, KEYWORDS_2)) {
-                strText += "_TRUE";
-            }
-            else {strText += "_FALSE";}
-            strncpy(resultText, strText.c_str(), sizeof(strText));
+        if (sum%100 != xy) {
+            resultText = {};
+            return;
         }
+
+        int key = (conflictIndex+repairCost) % 26;
+        int block_length = (key%5) + 4;
+        int block = 1;
+        int result_idx = 0;
+        bool is_stopped = false;
+        while (!is_stopped) {
+            int start = block*block_length-1;
+            int end = (block-1)*block_length-1;
+            if (start >= idx) {
+                is_stopped = true;
+                start = idx - 1;
+            }
+            for (int i = start; i > end; i--) {
+                resultText[result_idx] = caesarChar(cipherText[i], -key);
+                result_idx++;
+            }
+            block++;
+        }
+        resultText[result_idx] = '\0';
+        char tempText[result_idx+100];
+        strcpy(tempText, resultText);
+        string strText = resultText;
+        if (uppercase_and_find(tempText, result_idx+100, KEYWORDS_1) || uppercase_and_find(tempText, result_idx+100, KEYWORDS_2)) {
+            strText += "_TRUE";
+        }
+        else {strText += "_FALSE";}
+        strcpy(resultText, strText.c_str());
     }
 
 // Task 5
