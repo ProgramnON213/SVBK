@@ -59,6 +59,15 @@ void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME],
     int skill[FIXED_CHARACTER], int hp[FIXED_CHARACTER],
     char other_character[FIXED_CHARACTER-2][MAX_NAME], int other_skill[FIXED_CHARACTER-2], 
     int other_cost[FIXED_CHARACTER-2], int luffy_idx,  int usopp_idx);
+void pick_character(char other_character[FIXED_CHARACTER-2][MAX_NAME], 
+    int other_cost[FIXED_CHARACTER-2], int other_skill[FIXED_CHARACTER-2], 
+    char duel[FIXED_CHARACTER][MAX_NAME], int sum_to_reach);
+int sum(int array[], int len);
+void turn_i_into_binary(int i, int indexes[], int len);
+int calculate_cost(int indexes[], int other_cost[],int len);
+int calculate_skill(int indexes[], int other_skill[], int len);
+void put_indexes_to_duel(int dream_team_indexes[], char duel[FIXED_CHARACTER][MAX_NAME], 
+    char other_character[FIXED_CHARACTER-2][MAX_NAME], int len); 
 char caesarChar(char c, int key);
 bool uppercase_and_find(char input[], int input_length, const char target[]);
 

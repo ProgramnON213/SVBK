@@ -33,6 +33,11 @@ int main(int argc, const char * argv[]) {
     char cipherText[] = "AQ 7XK#96";
     char resultText[] = "                             ";
     decodeCP9Message(character, hp, skill, 120, 1500, cipherText, resultText);
-    cout << resultText << endl;
+//    cout << resultText << endl;
+    int temp[5] = {0, 1, 2, 3, 4};
+    resolveDuel(character, hp, skill, conflictIndex, repairCost, duel);
+    for (int i = 0; i < 7; i++) {
+        cout << duel[i] << endl;
+    }
     return 0;
 }

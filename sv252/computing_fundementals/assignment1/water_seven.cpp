@@ -69,12 +69,7 @@ void resolveDuel(
         int other_cost[FIXED_CHARACTER-2];
         int other_skill[FIXED_CHARACTER-2];
         set_other_character_stat(character, skill, hp, other_character, other_skill, other_cost, luffy_idx, usopp_idx);
-        for (int i = 0; i < FIXED_CHARACTER-2; i++) {
-            cout << other_character[i] << "/" << other_skill[i] << "/" << other_cost[i] << endl;
-        }
-        // TODO: Find the idxes needed, put it in an array
-        // The idxes should be refer to the other_character arrays 
-        // using other_character and add the sorted array to duel
+        pick_character(other_character, other_cost, other_skill, duel, sum_to_reach);
     }
 
 // Task 4
@@ -255,6 +250,75 @@ bool uppercase_and_find(char input[], int input_length, const char target[]) {
     return (pos);
 }
 
+void pick_character(char other_character[FIXED_CHARACTER-2][MAX_NAME], 
+    int other_cost[FIXED_CHARACTER-2], int other_skill[FIXED_CHARACTER-2], 
+    char duel[FIXED_CHARACTER][MAX_NAME], int sum_to_reach) {
+        if (sum_to_reach <= 0 || sum(other_skill, FIXED_CHARACTER-2) <= sum_to_reach) {
+            duel = {};
+            return;
+        }
+        int indexes[5] = {1, 1, 1, 1, 1};
+        int min_cost = calculate_cost(indexes, other_cost, 5);  // Set max cost at min_cost in the beginning
+        int temp_cost;
+        int dream_team_indexes[5];
+        copy(begin(indexes), end(indexes), begin(dream_team_indexes));
+        
+        for (int i = 0; i < 31; i++) {
+            turn_i_into_binary(i, indexes, 5);
+            temp_cost = calculate_cost(indexes, other_cost, 5);
+            if (calculate_skill(indexes, other_skill, 5) >= sum_to_reach && temp_cost <= min_cost) {
+                copy(begin(indexes), end(indexes), begin(dream_team_indexes));
+                min_cost = temp_cost;
+            }
+        }
+
+        put_indexes_to_duel(dream_team_indexes, duel, other_character, 5);
+        return;
+    }
+
+int sum(int array[], int len) {
+    int sum = 0;
+    for (int i = 0; i < len; i++) {
+        sum += array[i];
+    }
+    return sum;
+}
+
+void turn_i_into_binary(int i, int indexes[], int len) {
+    int temp = i;
+    for (int j = 0; j < len; j++) {
+        indexes[j] = temp%2;
+        temp /= 2;
+    }
+    return;
+}
+int calculate_cost(int indexes[], int other_cost[],int len) {
+    int sum = 0;
+    for (int i = 0; i < len; i++) {
+        if (indexes[i] == 1) {sum += other_cost[i];}
+    }
+    return sum;
+}
+
+int calculate_skill(int indexes[], int other_skill[], int len) {
+    int sum = 0;
+    for (int i = 0; i < len; i++) {
+        if (indexes[i] == 1) {sum += other_skill[i];}
+    }
+    return sum;
+}
+
+void put_indexes_to_duel(int dream_team_indexes[], char duel[FIXED_CHARACTER][MAX_NAME], 
+    char other_character[FIXED_CHARACTER-2][MAX_NAME], int len) {
+    int duel_index = 0;
+    for (int i = 0; i < len; i++) {
+        if (dream_team_indexes[i] == 1) {
+            strcpy(duel[duel_index], other_character[i]);
+            duel_index++;
+        }
+    }
+    return;
+}
 
 ////////////////////////////////////////////////
 /// END OF STUDENT'S ANSWER
