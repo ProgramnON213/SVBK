@@ -15,7 +15,7 @@ using namespace std;
 
 
 int main(int argc, const char * argv[]) {
-cout << "=== Task 4: Decode CP9 Message ===" << endl;
+    cout << "=== Task 4: Decode CP9 Message ===" << endl;
     char character[FIXED_CHARACTER][MAX_NAME];
     int hp[FIXED_CHARACTER];
     int skill[FIXED_CHARACTER];
@@ -24,18 +24,12 @@ cout << "=== Task 4: Decode CP9 Message ===" << endl;
     string filename = "opw_tc_01_input";
     readInput(filename, character, hp, skill, shipHP, repairCost);
 
-    char cipherText0[] = "AQ 7XK#96";
-    char resultText0[1000] = {};
-    decodeCP9Message(character, hp, skill, 120, 1500, cipherText0, resultText0);
-    cout << resultText0;
-
     int adjustedRepairCost = damageEvaluation(shipHP, repairCost);
     int conflictIndex = conflictSimulation(character, hp, skill, shipHP, adjustedRepairCost);
 
     // Test valid message with CP9
     char cipherText1[] = "D 0KXN#89";
     char resultText1[1000] = {};
-    cout << conflictIndex << " " << repairCost << endl;
     decodeCP9Message(character, hp, skill, conflictIndex, adjustedRepairCost, cipherText1, resultText1);
     cout << "Test 1 - Cipher: " << cipherText1 << " -> Decoded: " << resultText1 << endl;
 

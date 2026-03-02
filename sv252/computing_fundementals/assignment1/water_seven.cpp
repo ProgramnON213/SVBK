@@ -95,7 +95,6 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
         }
 
         int key = (conflictIndex+repairCost) % 26;
-        cout << key << endl;
         int block_length = (key%5) + 4;
         int block = 1;
         int result_idx = 0;
