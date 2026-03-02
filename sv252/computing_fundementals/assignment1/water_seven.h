@@ -68,7 +68,9 @@ int calculate_cost(int indexes[], int other_cost[],int len);
 int calculate_skill(int indexes[], int other_skill[], int len);
 void put_indexes_to_duel(int dream_team_indexes[], char duel[FIXED_CHARACTER][MAX_NAME], 
     char other_character[FIXED_CHARACTER-2][MAX_NAME], int len); 
-char caesarChar(char c, int key);
+int count_member(int team[], int len);
+char caesar_final(char c, int key);
+char caesar_char(char c, int key);
 bool uppercase_and_find(char input[], int input_length, const char target[]);
 
 ////////////////////////////////////////////////

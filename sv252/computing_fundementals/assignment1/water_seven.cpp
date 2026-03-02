@@ -10,7 +10,7 @@ bool readInput(
     const string &filename,
     char character[FIXED_CHARACTER][MAX_NAME], int hp[FIXED_CHARACTER], 
     int skill[FIXED_CHARACTER], int &shipHP, int &repairCost){
-        fstream f(filename);
+        ifstream f(filename);
         if (!f.is_open()) {return false;}
         string line, temp;
         int idx = 0;
@@ -30,11 +30,17 @@ bool readInput(
                     idx++;
                 }
                 strcpy(character[pos], name);
+
+                if (stat1 >= 1000)  stat1 = 1000;
+                if (stat1 < 0)  stat1 = 0;
                 hp[pos] = stat1;
+
+                if (stat2 >= 100)   stat2 = 100;
+                if (stat2 < 0)  stat2 = 0;
                 skill[pos] = stat2;
             }
         }
-        return false;
+        return true;
 }
 
 // Task 1
@@ -51,7 +57,7 @@ int conflictSimulation(
     int shipHP, int repairCost){
         int luffy_idx = find_names(character, "LUFFY");
         int usopp_idx = find_names(character, "USOPP");
-        int conflictIndex = round(skill[luffy_idx] - skill[usopp_idx] + repairCost/100.0 + (500-shipHP)/50.0);
+        int conflictIndex = ceil(skill[luffy_idx] - skill[usopp_idx] + repairCost/100.0 + (500-shipHP)/50.0);
         return repeatingConflictSimulation(conflictIndex);
     }
 
@@ -84,11 +90,12 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
 
         int xy = (cipherText[idx+1]-48)*10 + cipherText[idx+2]-48;
         if (sum%100 != xy) {
-            resultText = {};
+            resultText[0] = '\0';
             return;
         }
 
         int key = (conflictIndex+repairCost) % 26;
+        cout << key << endl;
         int block_length = (key%5) + 4;
         int block = 1;
         int result_idx = 0;
@@ -101,7 +108,7 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
                 start = idx - 1;
             }
             for (int i = start; i > end; i--) {
-                resultText[result_idx] = caesarChar(cipherText[i], -key);
+                resultText[result_idx] = caesar_final(cipherText[i], key);
                 result_idx++;
             }
             block++;
@@ -223,7 +230,14 @@ void set_other_character_stat(char character[FIXED_CHARACTER][MAX_NAME],
     return;
 }
 
-char caesarChar(char c, int key) {
+char caesar_final(char c, int key) {
+    if (47 < c && c < 58) {
+         key = key % 10;
+    }
+    return caesar_char(c, -key);
+}
+
+char caesar_char(char c, int key) {
     if (47 < c && c < 58) {
          c += key;
          if (c < 48)    c += 10;
@@ -262,15 +276,25 @@ void pick_character(char other_character[FIXED_CHARACTER-2][MAX_NAME],
         int indexes[5] = {1, 1, 1, 1, 1};
         int min_cost = calculate_cost(indexes, other_cost, 5);  // Set max cost at min_cost in the beginning
         int temp_cost;
-        int dream_team_indexes[5];
-        copy(begin(indexes), end(indexes), begin(dream_team_indexes));
+        int member_count;
+        int dream_team_indexes[5] = {1, 1, 1, 1, 1};
+        int dream_team_member_count = 5;
         
         for (int i = 0; i < 31; i++) {
             turn_i_into_binary(i, indexes, 5);
+            member_count = count_member(indexes, 5);
             temp_cost = calculate_cost(indexes, other_cost, 5);
             if (calculate_skill(indexes, other_skill, 5) >= sum_to_reach && temp_cost <= min_cost) {
-                copy(begin(indexes), end(indexes), begin(dream_team_indexes));
-                min_cost = temp_cost;
+                if (temp_cost < min_cost) {
+                    copy(begin(indexes), end(indexes), begin(dream_team_indexes));
+                    min_cost = temp_cost;
+                    dream_team_member_count = member_count;
+                }
+                else if (member_count < dream_team_member_count) {
+                    copy(begin(indexes), end(indexes), begin(dream_team_indexes));
+                    min_cost = temp_cost;
+                    dream_team_member_count = member_count;
+                }
             }
         }
 
@@ -320,6 +344,16 @@ void put_indexes_to_duel(int dream_team_indexes[], char duel[FIXED_CHARACTER][MA
         }
     }
     return;
+}
+
+int count_member(int team[], int len) {
+    int count = 0;
+    for (int i = 0; i < len; i++) {
+        if (team[i] == 1) {
+            count++;
+        }
+    }
+    return count;
 }
 
 ////////////////////////////////////////////////
