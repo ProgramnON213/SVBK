@@ -21,7 +21,11 @@ bool readInput(
             f >> stat1 >> stat2;
             if (strcmp(name, "GOING_MERRY") == 0) {
                 shipHP = stat1;
+                if (shipHP < 0) shipHP = 0;
+                if (shipHP > 1000)  shipHP = 1000;
                 repairCost = stat2;
+                if (repairCost < 0) repairCost = 0;
+                if (repairCost > 3000)  repairCost = 3000;
             }
             else {
                 int pos = find_names(character, name);
