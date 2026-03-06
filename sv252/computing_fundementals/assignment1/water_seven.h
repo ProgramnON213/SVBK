@@ -71,7 +71,7 @@ void put_indexes_to_duel(int dream_team_indexes[], char duel[FIXED_CHARACTER][MA
 int count_member(int team[], int len);
 char caesar_final(char c, int key);
 char caesar_char(char c, int key);
-bool uppercase_and_find(char input[], int input_length, const char target[]);
+bool find(char input[], int input_length, const char target[]);
 
 ////////////////////////////////////////////////
 /// END OF STUDENT'S ANSWER

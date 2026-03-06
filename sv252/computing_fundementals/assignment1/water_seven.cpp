@@ -116,7 +116,7 @@ void decodeCP9Message(char character[FIXED_CHARACTER][MAX_NAME],
         char tempText[result_idx+100];
         strcpy(tempText, resultText);
         string strText = resultText;
-        if (uppercase_and_find(tempText, result_idx+100, KEYWORDS_1) || uppercase_and_find(tempText, result_idx+100, KEYWORDS_2)) {
+        if (find(tempText, result_idx+100, KEYWORDS_1) || find(tempText, result_idx+100, KEYWORDS_2)) {
             strText += "_TRUE";
         }
         else {strText += "_FALSE";}
@@ -255,12 +255,7 @@ char caesar_char(char c, int key) {
     return c;
 }
 
-bool uppercase_and_find(char input[], int input_length, const char target[]) {
-    for (int i = 0; i < input_length; i++) {
-        if (input[i] >= 97 && input[i] <= 122) {
-            input[i] -= 32;
-        }
-    }
+bool find(char input[], int input_length, const char target[]) {
     char* pos = strstr(input, target);
     return (pos);
 }
