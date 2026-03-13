@@ -267,7 +267,7 @@ bool find(char input[], int input_length, const char target[]) {
 void pick_character(char other_character[FIXED_CHARACTER-2][MAX_NAME], 
     int other_cost[FIXED_CHARACTER-2], int other_skill[FIXED_CHARACTER-2], 
     char duel[FIXED_CHARACTER][MAX_NAME], int sum_to_reach) {
-        if (sum_to_reach <= 0 || sum(other_skill, FIXED_CHARACTER-2) <= sum_to_reach) {
+        if (sum_to_reach <= 0 || sum(other_skill, FIXED_CHARACTER-2) < sum_to_reach) {
             duel = {};
             return;
         }
