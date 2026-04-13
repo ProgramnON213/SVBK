@@ -89,6 +89,140 @@ void testTask4() {
     cout << resultText << endl; //(empty)
 }
 
+// Cấu trúc Testcase sử dụng mảng tĩnh
+struct TestCase5a {
+    int id;
+    const char* description;
+    int grid[MAX_GRID][MAX_GRID];
+    int rows;
+    int cols;
+    int expectedOutput;
+};
+void testTask5a() {
+    // Khởi tạo mảng testcases. 
+    // Các ô không được khai báo rõ ràng sẽ tự động được gán giá trị 0 (padding),
+    // nhưng hàm analyzeDangerLimit chỉ đọc đến giới hạn 'rows' và 'cols' nên không bị ảnh hưởng.
+    TestCase5a testCases[] = {
+        {1, "Ma tran hon hop co ban", 
+            {{0, 1, -1, 2}, 
+             {-1, 3, 1, 0}, 
+             {-1, -1, -1, 1}}, 
+         3, 4, 7},
+             
+        {2, "maxCell khong nam trong hang co maxRowSum", 
+            {{3, -1, -1}, 
+             {1, 1, 2}, 
+             {0, 0, 0}}, 
+         3, 3, 7},
+             
+        {3, "Khu vuc hoan toan an toan (Toan 0)", 
+            {{0, 0, 0}, 
+             {0, 0, 0}}, 
+         2, 3, 0},
+             
+        {4, "Khu vuc cuc ky nguy hiem (Toan 3)", 
+            {{3, 3, 3}, 
+             {3, 3, 3}, 
+             {3, 3, 3}}, 
+         3, 3, 12},
+             
+        {6, "Ma tran 1x1 (Nho nhat)", 
+            {{2}}, 
+         1, 1, 4},
+            
+        {7, "Ma tran chi co 1 hang", 
+            {{-1, 1, 2, 3, -1}}, 
+         1, 5, 9},
+            
+        {8, "Ma tran chi co 1 cot", 
+            {{-1}, 
+             {2}, 
+             {3}, 
+             {-1}}, 
+         4, 1, 6}
+    };
+
+    int numTests = sizeof(testCases) / sizeof(testCases[0]);
+    int passed = 0;
+
+    for (int i = 0; i < numTests; ++i) {
+        int result = analyzeDangerLimit(testCases[i].grid, testCases[i].rows, testCases[i].cols);
+        
+        cout << "Testcase " << testCases[i].id << ": " << testCases[i].description << "\n";
+        if (result == testCases[i].expectedOutput) {
+            cout << "  -> [PASS] Expected: " << testCases[i].expectedOutput << " | Got: " << result << "\n";
+            passed++;
+        } else {
+            cout << "  -> [FAIL] Expected: " << testCases[i].expectedOutput << " | Got: " << result << "\n";
+        }
+        cout << "----------------------------------------\n";
+    }
+    
+    cout << "\nTong ket: Passed " << passed << "/" << numTests << " testcases.\n";
+}
+
+// Cấu trúc Testcase
+struct TestCase5b {
+    int id;
+    const char* description;
+    int grid[MAX_GRID][MAX_GRID];
+    int rows;
+    int cols;
+    int dangerLimit;
+    bool expectedOutput;
+};
+
+void testTask5b() {
+    TestCase5b testCases[] = {
+        {1, "Co lo trinh va an toan", 
+            {{0, 1, 0}, 
+             {0, 2, 0}, 
+             {0, 0, 0}}, 3, 3, 5, true},
+             
+        {2, "Nhieu lo trinh, phai chon duong toi uu (dp)", 
+            {{0, 5, 0}, 
+             {1, 1, 1}, 
+             {5, 5, 0}}, 3, 3, 4, true},
+             
+        {3, "Co duong nhung vuot nguong nguy hiem", 
+            {{1, 2, 3}, 
+             {1, -1, 2}, 
+             {1, 1, 1}}, 3, 3, 3, false},
+             
+        {4, "Bi chan boi hang rao -1", 
+            {{0, 1, 0}, 
+             {-1, -1, -1}, 
+             {0, 0, 0}}, 3, 3, 10, false},
+             
+        {5, "Diem xuat phat bi chan", 
+            {{-1, 0}, 
+             {0, 0}}, 2, 2, 100, false},
+             
+        {6, "Ma tran 1 chieu (vuot limit)", 
+            {{0, 1, 2, 3}}, 1, 4, 5, false}
+    };
+
+    int numTests = sizeof(testCases) / sizeof(testCases[0]);
+    int passed = 0;
+
+    for (int i = 0; i < numTests; ++i) {
+        bool result = evaluateRoute(testCases[i].grid, testCases[i].rows, testCases[i].cols, testCases[i].dangerLimit);
+        
+        cout << "Testcase " << testCases[i].id << ": " << testCases[i].description << "\n";
+        if (result == testCases[i].expectedOutput) {
+            cout << "  -> [PASS] Expected: " << (testCases[i].expectedOutput ? "true" : "false") 
+                 << " | Got: " << (result ? "true" : "false") << "\n";
+            passed++;
+        } else {
+            cout << "  -> [FAIL] Expected: " << (testCases[i].expectedOutput ? "true" : "false") 
+                 << " | Got: " << (result ? "true" : "false") << "\n";
+        }
+        cout << "----------------------------------------\n";
+    }
+    
+    cout << "\nTong ket: Passed " << passed << "/" << numTests << " testcases.\n";
+}
+
 // cout << testTask2("task2a", character, hp, skill, shipHP, repairCost) << endl; // 334
 // cout << testTask2("task2b", character, hp, skill, shipHP, repairCost) << endl; // 279
 
@@ -98,6 +232,6 @@ int main(int argc, const char * argv[]) {
     int skill[FIXED_CHARACTER];
     int shipHP, repairCost;
     char duel[FIXED_CHARACTER][MAX_NAME];
-    testTask4();
+    testTask5b();
     return 0;
 }
