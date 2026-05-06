@@ -227,11 +227,6 @@ void testTask5b() {
 // cout << testTask2("task2b", character, hp, skill, shipHP, repairCost) << endl; // 279
 
 int main(int argc, const char * argv[]) {
-    char character[FIXED_CHARACTER][MAX_NAME];
-    int hp[FIXED_CHARACTER];
-    int skill[FIXED_CHARACTER];
-    int shipHP, repairCost;
-    char duel[FIXED_CHARACTER][MAX_NAME];
     testTask5b();
     return 0;
 }

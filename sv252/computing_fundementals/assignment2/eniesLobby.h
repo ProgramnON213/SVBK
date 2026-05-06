@@ -13,6 +13,9 @@ struct TurnNode;
  */
 class Character {
 protected:
+    bool killInTurn;
+
+protected:
     string name;
     int hp;
     int maxHp;
@@ -36,15 +39,27 @@ public:
     virtual void endTurn(BattleContext& context);
 
     void receiveDamage(int damage);
+    
     bool isAlive() const;
+
     string getName() const;
+    int getMaxHP() const;
     int getHP() const;
     int getEnergy() const;
+    int getDef() const;
+    int getSpeed() const;
+
+    void setName(string name);
+    void setHP(int hp);
+    void setEnergy(int energy);
+    void setDef(int def);
+    void setSpeed(int speed);
 
     virtual bool isStrawHat() const;
     virtual bool isCP9() const;
 
     virtual string str() const = 0;
+    string strCharacter() const;
 };
 
 /*
@@ -71,8 +86,14 @@ public:
     Luffy(string name, int hp, int atk, int def,
           int speed, int energy, long long bounty);
 
+    int calculateAttackDamge() const;          
     int attack(Character* target, BattleContext& context);
+    int attack(Building* target, BattleContext& context);
+
+    int calculateSkillDamage(BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
+    int specialSkill(Building* target, BattleContext& context);
+
     void endTurn(BattleContext& context);
 };
 
@@ -82,7 +103,11 @@ public:
          int speed, int energy, long long bounty);
 
     int attack(Character* target, BattleContext& context);
+    int attack(Building* target, BattleContext& context);
+
     int specialSkill(Character* target, BattleContext& context);
+    int specialSkill(Building* target, BattleContext& context);
+
     void endTurn(BattleContext& context);
 };
 
@@ -93,6 +118,10 @@ public:
 
     int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
+
+    int attack(Building* target, BattleContext& context);
+    int specialSkill(Building* target, BattleContext& context);
+
     void endTurn(BattleContext& context);
 };
 
@@ -102,9 +131,10 @@ public:
          int speed, int energy, long long bounty);
 
     int attack(Character* target, BattleContext& context);
-    int specialSkill(Character* target, BattleContext& context);
-
     int attack(Building* target, BattleContext& context);
+
+    void skillEffect(BattleContext& context) const;
+    int specialSkill(Character* target, BattleContext& context);
     int specialSkill(Building* target, BattleContext& context);
 
     void endTurn(BattleContext& context);
@@ -116,7 +146,11 @@ public:
             int speed, int energy, long long bounty);
 
     int attack(Character* target, BattleContext& context);
+    int attack(Building* target, BattleContext& context);
+
     int specialSkill(Character* target, BattleContext& context);
+    //int specialSkill(Building* target, BattleContext& context); Cannot affect building
+
     void endTurn(BattleContext& context);
 };
 
@@ -127,6 +161,10 @@ public:
 
     int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
+
+    int attack(Building* target, BattleContext& context);
+    int specialSkill(Building* target, BattleContext& context);
+
     void endTurn(BattleContext& context);
 };
 
@@ -136,10 +174,12 @@ public:
            int speed, int energy, long long bounty);
 
     int attack(Character* target, BattleContext& context);
-    int specialSkill(Character* target, BattleContext& context);
-
     int attack(Building* target, BattleContext& context);
-    int specialSkill(Building* target, BattleContext& context);
+
+    int specialSkill1(Character* target, BattleContext& context);
+    int specialSkill1(Building* target, BattleContext& context);
+    int specialSkill2(Character* target, BattleContext& context);
+    int specialSkill2(Building* target, BattleContext& context);
 
     void endTurn(BattleContext& context);
 };
@@ -253,6 +293,12 @@ public:
 public:
     BattleContext();
     void nextTurn();
+    void defaultMoraleIncrease();
+    void setMorale(int morale);
+    void setAlarmLevel(int alarmLevel);
+    void setRescueProgress(int rescueProgress);
+    void setEscapeProgress(int escapeProgress);
+    void setBusterCallTimer(int busterCallTimer);
 };
 
 /*
@@ -274,9 +320,14 @@ public:
 
     virtual void applyEffect(BattleContext& context) = 0;
     virtual void onDestroyed(BattleContext& context);
+    
+    virtual string str () const;
 
     string getName() const;
     int getHP() const;
+    int getMaxHP() const;
+
+    void setHP(int hp);
 };
 
 /*
@@ -368,7 +419,7 @@ public:
 };
 
 
-
+int setByCondition(int n, int min=0, int max=100);
 
 
 #endif
