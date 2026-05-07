@@ -64,7 +64,7 @@ void testRounding() {
     // Give Sanji an odd speed of 25. 50% of 25 = 12.5. 
     // Assignment rule: Always round UP[cite: 39]. So 12.5 -> 13.
     // Total attack: 20 (atk) + 13 (speed bonus) = 33.
-    Sanji sanji("Sanji", 100, 20, 10, 25, 50, 1000);
+    Sanji sanji("Sanji", 100, 20, 0, 25, 50, 1000);
     
     // Give target 0 defense so we can measure raw damage easily.
     Lucci target("Lucci", 100, 10, 0, 10, 50, 1000); 

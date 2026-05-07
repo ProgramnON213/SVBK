@@ -23,12 +23,16 @@ protected:
     int def;
     int speed;
     int energy;
+    int energyRequirement;
     bool alive;
 
 public:
     Character();
     Character(string name, int hp, int atk, int def, int speed, int energy);
     virtual ~Character();
+
+    virtual int takeTurn(Character* target, BattleContext& context);
+    virtual int takeTurn(Building* target, BattleContext& context);
 
     virtual int attack(Character* target, BattleContext& context) = 0;
     virtual int specialSkill(Character* target, BattleContext& context) = 0;
@@ -85,6 +89,9 @@ class Luffy : public StrawHat {
 public:
     Luffy(string name, int hp, int atk, int def,
           int speed, int energy, long long bounty);
+
+    int takeTurn(Character* target, BattleContext& context);
+    int takeTurn(Building* target, BattleContext& context);
 
     int calculateAttackDamge() const;          
     int attack(Character* target, BattleContext& context);
@@ -173,6 +180,9 @@ public:
     Franky(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty);
 
+    int takeTurn(Character* target, BattleContext& context);
+    int takeTurn(Building* target, BattleContext& context);
+    
     int attack(Character* target, BattleContext& context);
     int attack(Building* target, BattleContext& context);
 
@@ -198,6 +208,8 @@ public:
 
     virtual bool isCP9() const;
     virtual string str() const;
+
+    virtual int attack(Character* target, BattleContext& context);
 };
 
 /*
@@ -218,7 +230,7 @@ public:
     Kaku(string name, int hp, int atk, int def,
          int speed, int energy, int doriki);
 
-    int attack(Character* target, BattleContext& context);
+    //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
 };
@@ -228,7 +240,7 @@ public:
     Jabra(string name, int hp, int atk, int def,
           int speed, int energy, int doriki);
 
-    int attack(Character* target, BattleContext& context);
+    //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
 };
@@ -238,7 +250,7 @@ public:
     Blueno(string name, int hp, int atk, int def,
            int speed, int energy, int doriki);
 
-    int attack(Character* target, BattleContext& context);
+    //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
 };
@@ -248,7 +260,7 @@ public:
     Kalifa(string name, int hp, int atk, int def,
            int speed, int energy, int doriki);
 
-    int attack(Character* target, BattleContext& context);
+    //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
 };
@@ -258,7 +270,7 @@ public:
     Kumadori(string name, int hp, int atk, int def,
              int speed, int energy, int doriki);
 
-    int attack(Character* target, BattleContext& context);
+    //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
 };
@@ -268,7 +280,7 @@ public:
     Fukurou(string name, int hp, int atk, int def,
             int speed, int energy, int doriki);
 
-    int attack(Character* target, BattleContext& context);
+    //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
 };
