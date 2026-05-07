@@ -8,6 +8,11 @@ class Building;
 class Character;
 struct TurnNode;
 
+int const MAX_STRAW_HAT_COUNT = 7;
+int const MAX_CP9_COUNT = 7;
+int const MAX_CHARACTER_COUNT = MAX_STRAW_HAT_COUNT + MAX_CP9_COUNT;
+int const MAX_BUILDING_COUNT = 5;
+
 /*
  * Character
  */
@@ -77,6 +82,9 @@ public:
     StrawHat();
     StrawHat(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty);
+
+    virtual int attack(Character* target, BattleContext& context);
+    virtual int specialSkill(Character* target, BattleContext& context);
 
     virtual bool isStrawHat() const;
     virtual string str() const;
@@ -186,6 +194,8 @@ public:
     int attack(Character* target, BattleContext& context);
     int attack(Building* target, BattleContext& context);
 
+    int specialSkill(Character* target, BattleContext& context);
+    int specialSkill(Building* target, BattleContext& context);
     int specialSkill1(Character* target, BattleContext& context);
     int specialSkill1(Building* target, BattleContext& context);
     int specialSkill2(Character* target, BattleContext& context);
@@ -210,6 +220,7 @@ public:
     virtual string str() const;
 
     virtual int attack(Character* target, BattleContext& context);
+    virtual int specialSkill(Character* target, BattleContext& context);
 };
 
 /*
@@ -304,6 +315,8 @@ public:
 
 public:
     BattleContext();
+    BattleContext(int morale, int alarmLevel, int rescueProgress, 
+                int escapeProgress, int busterCallTimer);
     void nextTurn();
     void defaultMoraleIncrease();
     void setMorale(int morale);
@@ -409,6 +422,8 @@ private:
     TurnNode* turnOrder;
     BattleContext context;
     int maxTurns;
+
+    string result;
 
 public:
     EniesLobbyBattle(const string& filename);

@@ -17,6 +17,19 @@ BattleContext::BattleContext() {
     resultCode = "";
 }
 
+BattleContext::BattleContext(int morale, int alarmLevel, int rescueProgress, 
+        int escapeProgress, int busterCallTimer) {
+    setMorale(morale);
+    setAlarmLevel(alarmLevel);
+    setRescueProgress(rescueProgress);
+    setEscapeProgress(escapeProgress);
+    setBusterCallTimer(busterCallTimer);
+    mainGateDestroyed = false;
+    robinRescued = false;
+    bridgeOpened = false;
+    battleEnded = false;
+}
+
 void BattleContext::nextTurn() {
     // TODO: implement
     turnCount++;
@@ -215,6 +228,13 @@ string StrawHat::str() const {
     stringstream res;
     res << "StrawHat [" << this->strCharacter() << ", bounty=" << this->bounty << "]";
     return res.str();
+}
+
+int StrawHat::attack(Character* target, BattleContext& context) {
+    return 0;
+}
+int StrawHat::specialSkill(Character* target, BattleContext& context) {
+    return 0;
 }
 
 /*
@@ -690,6 +710,13 @@ int Franky::attack(Building* target, BattleContext& context) {
     return damage;
 }
 
+int Franky::specialSkill(Character* target, BattleContext& context) {
+    return 0;
+}
+int Franky::specialSkill(Building* target, BattleContext& context) {
+    return 0;
+}
+
 int Franky::specialSkill1(Character* target, BattleContext& context) {
     // TODO: implement
     int damage = ceil(1.8 * atk);
@@ -776,6 +803,10 @@ int CP9Agent::attack(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
 
     return damage;
+}
+
+int CP9Agent::specialSkill(Character* target, BattleContext& context) {
+    return 0;
 }
 
 /*
@@ -1016,6 +1047,10 @@ bool Building::isDestroyed() const {
     return destroyed;
 }
 
+void Building::applyEffect(BattleContext& context) {
+    return ;
+}
+
 void Building::onDestroyed(BattleContext& context) {
     return ;
 }
@@ -1134,26 +1169,172 @@ void BusterCallShip::onDestroyed(BattleContext& context) {
  */
 EniesLobbyBattle::EniesLobbyBattle(const string& filename) {
     // TODO: implement
+    strawHats = new Character* [MAX_STRAW_HAT_COUNT];
+    strawHatCount = 0;
+    
+    cp9Agents = new Character* [MAX_CHARACTER_COUNT];
+    cp9Count = 0;
+
+    buildings = new Building* [MAX_BUILDING_COUNT];
+    buildingCount = 0;
+
+    result = "";
+
+    loadFromFile(filename);
 }
 
 EniesLobbyBattle::~EniesLobbyBattle() {
     // TODO: implement
+    for (int i = 0; i < MAX_STRAW_HAT_COUNT; i++) {
+        delete strawHats[i];
+    }
+    delete[] strawHats;
+
+    for (int i = 0; i < MAX_CP9_COUNT; i++) {
+        delete cp9Agents[i];
+    }
+    delete[] cp9Agents;
+
+    for (int i = 0; i < MAX_BUILDING_COUNT; i++) {
+        delete buildings[i];
+    }
+    delete[] buildings;
 }
 
 void EniesLobbyBattle::loadFromFile(const string& filename) {
     // TODO: implement
+    ifstream f(filename);
+    if (!f.is_open()) {return;}
+    string line;
+    while (getline(f, line)) {
+        stringstream stream(line);
+        string lineObjectType;
+        stream >> lineObjectType;
+
+        if (lineObjectType == "CONTEXT") {
+            int morale, alarmLevel, rescueProgress, escapeProgress, busterCallTimer, maxTurns;
+            stream >> morale >> alarmLevel >> rescueProgress >> escapeProgress >> busterCallTimer >> maxTurns;
+            this->maxTurns = maxTurns;
+            BattleContext context = BattleContext(morale, alarmLevel, rescueProgress, escapeProgress, busterCallTimer);
+        }
+        
+        else if (lineObjectType == "STRAW_HAT") {
+            string name;
+            int hp, atk, def, speed, energy;
+            long long bounty;
+            stream >> name >> hp >> atk >> def >> speed >> energy >> bounty;
+
+            StrawHat* pirate;
+            if (name == "Luffy") {
+                pirate = new Luffy(name, hp, atk, def, speed, energy, bounty);
+            }
+            else if (name == "Zoro") {
+                pirate = new Zoro(name, hp, atk, def, speed, energy, bounty);
+            }
+            else if (name == "Sanji") {
+                pirate = new Sanji(name, hp, atk, def, speed, energy, bounty);
+            }
+            else if (name == "Nami") {
+                pirate = new Nami(name, hp, atk, def, speed, energy, bounty);
+            }
+            else if (name == "Chopper") {
+                pirate = new Chopper(name, hp, atk, def, speed, energy, bounty);
+            }
+            else if (name == "Usopp") {
+                pirate = new Usopp(name, hp, atk, def, speed, energy, bounty);
+            }
+            else if (name == "Franky") {
+                pirate = new Franky(name, hp, atk, def, speed, energy, bounty);
+            }
+            else {
+                pirate = nullptr;
+            }
+
+            addStrawHat(pirate);
+        }
+
+        else if (lineObjectType == "CP9") {
+            string name;
+            int hp, atk, def, speed, energy, doriki;
+            stream >> name >> hp >> atk >> def >> speed >> energy >> doriki;
+
+            CP9Agent* agent;
+            if (name == "Lucci") {
+                agent = new Lucci(name, hp, atk, def, speed, energy, doriki);
+            }
+            else if (name == "Kaku") {
+                agent = new Kaku(name, hp, atk, def, speed, energy, doriki);
+            }
+            else if (name == "Jabra") {
+                agent = new Jabra(name, hp, atk, def, speed, energy, doriki);
+            }
+            else if (name == "Blueno") {
+                agent = new Blueno(name, hp, atk, def, speed, energy, doriki);
+            }
+            else if (name == "Kalifa") {
+                agent = new Kalifa(name, hp, atk, def, speed, energy, doriki);
+            }
+            else if (name == "Kumadori") {
+                agent = new Kumadori(name, hp, atk, def, speed, energy, doriki);
+            }
+            else if (name == "Fukurou") {
+                agent = new Fukurou(name, hp, atk, def, speed, energy, doriki);
+            }
+            else {
+                agent = nullptr;
+            }
+
+            addCP9Agent(agent);
+        }
+
+        else if (lineObjectType == "BUILDING") {
+            string name;
+            int hp;
+            stream >> name >> hp;
+            Building* building;
+
+            if (name == "MainGate") {
+                building = new MainGate(name, hp);
+            }
+            else if (name == "Courthouse") {
+                building = new Courthouse(name, hp);
+            }
+            else if (name == "TowerOfJustice") {
+                building = new TowerOfJustice(name, hp);
+            }
+            else if (name == "BridgeOfHesitation") {
+                building = new BridgeOfHesitation(name, hp);
+            }
+            else if (name == "BusterCallShip") {
+                building = new BusterCallShip(name, hp);
+            }
+            else {
+                building = nullptr;
+            }
+
+            addBuilding(building);
+        }
+    }
+
+    buildTurnOrder();
 }
 
 void EniesLobbyBattle::addStrawHat(Character* character) {
     // TODO: implement
+    strawHats[strawHatCount] = character;
+    strawHatCount++;
 }
 
 void EniesLobbyBattle::addCP9Agent(Character* character) {
     // TODO: implement
+    cp9Agents[cp9Count] = character;
+    cp9Count++;
 }
 
 void EniesLobbyBattle::addBuilding(Building* building) {
     // TODO: implement
+    buildings[buildingCount] = building;
+    buildingCount++;
 }
 
 void EniesLobbyBattle::buildTurnOrder() {
@@ -1170,15 +1351,36 @@ void EniesLobbyBattle::processTurn(Character* character) {
 
 void EniesLobbyBattle::processBuildings() {
     // TODO: implement
+    for (int i = 0; i < buildingCount; i++) {
+        Building* building = buildings[i];
+        if (!building->isDestroyed()) {
+            building->applyEffect(context);
+        }
+    }
 }
 
 void EniesLobbyBattle::checkEndCondition() {
     // TODO: implement
+    if (context.robinRescued && context.escapeProgress >= 100) {
+        result = "STRAW_HAT_WIN";
+    }
+    else if (context.busterCallTimer <= 0) {
+        result = "BUSTER_CALL";
+    }
+    else if (true) {
+        result = "CP9_WIN";
+    }   // REMINDER: All strawHats dead
+    else if (true) {
+        result = "STRAW_HAT_WIN_BY_DEFEAT_CP9";
+    }   // REMINDER: All cp9Agents dead
+    else if (context.turnCount >= maxTurns) {
+        result = "TIME_OUT";
+    }
 }
 
 string EniesLobbyBattle::getResult() const {
     // TODO: implement
-    return "";
+    return result;
 }
 
 int setByCondition(int n, int min, int max) {
