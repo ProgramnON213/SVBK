@@ -54,7 +54,7 @@ public:
     int getSpeed() const;
 
     void setName(string name);
-    void setHP(int hp);
+    void setHPandState(int hp);
     void setEnergy(int energy);
     void setDef(int def);
     void setSpeed(int speed);
@@ -339,7 +339,7 @@ public:
     int getHP() const;
     int getMaxHP() const;
 
-    void setHP(int hp);
+    void setHPandState(int hp);
 };
 
 /*

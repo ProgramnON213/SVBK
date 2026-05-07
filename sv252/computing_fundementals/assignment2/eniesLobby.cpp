@@ -70,7 +70,7 @@ Character::Character(string name, int hp, int atk, int def, int speed, int energ
     // TODO: implement
     setName(name);
     this->maxHp = hp;
-    setHP(hp);
+    setHPandState(hp);
     this->atk = atk;
     this->def = def;
     this->speed = speed;
@@ -118,7 +118,7 @@ void Character::receiveDamage(int damage) {
     // TODO: implement
     int realDamage = damage - this->def;
     if (realDamage > 0) {
-        setHP(this->hp - realDamage);
+        setHPandState(this->hp - realDamage);
     }
 }
 
@@ -148,7 +148,7 @@ int Character::getMaxHP() const {
     return this->maxHp;
 }
 
-void Character::setHP(int hp) {
+void Character::setHPandState(int hp) {
     this->hp = setByCondition(hp, 0, maxHp);
     this->alive = !(this->hp == 0);
 }
@@ -291,7 +291,7 @@ int Luffy::calculateSkillDamage(BattleContext& context) {
     speed += 15;
     context.setAlarmLevel(context.alarmLevel + 10);
     int lostHp = ceil(0.08*maxHp);
-    setHP(hp - lostHp);
+    setHPandState(hp - lostHp);
     return damage;
 }
 
@@ -559,7 +559,7 @@ int Chopper::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
     int heal = 35 + ceil(0.5 * atk);
 
-    target->setHP(target->getHP() + heal);
+    target->setHPandState(target->getHP() + heal);
     if (target->getName() == "LUFFY") {
         //context.setMorale(context.morale + 5);
     }
@@ -998,7 +998,7 @@ Building::Building(string name, int hp) {
     // TODO: implement
     this->name = name;
     this->maxHP = hp;
-    setHP(hp);
+    setHPandState(hp);
 }
 
 Building::~Building() {
@@ -1007,7 +1007,7 @@ Building::~Building() {
 
 void Building::receiveDamage(int damage) {
     // TODO: implement
-    setHP(getHP() - damage);
+    setHPandState(getHP() - damage);
 }
 
 bool Building::isDestroyed() const {
@@ -1034,7 +1034,7 @@ int Building::getMaxHP() const {
     return maxHP;
 }
 
-void Building::setHP(int hp) {
+void Building::setHPandState(int hp) {
     this->hp = setByCondition(hp, 0, this->maxHP);
     this->destroyed = (this->hp == 0);
 }
@@ -1052,10 +1052,14 @@ MainGate::MainGate(string name, int hp) : Building(name, hp) {}
 
 void MainGate::applyEffect(BattleContext& context) {
     // TODO: implement
+    // REMINDER: if not destroyed, rescueProgress will not increase in this turn
 }
 
 void MainGate::onDestroyed(BattleContext& context) {
     // TODO: implement
+    context.mainGateDestroyed = true;
+    context.setRescueProgress(context.rescueProgress + 20);
+    //context.setMorale(context.morale + 5);
 }
 
 /*
@@ -1065,10 +1069,12 @@ Courthouse::Courthouse(string name, int hp) : Building(name, hp) {}
 
 void Courthouse::applyEffect(BattleContext& context) {
     // TODO: implement
+    context.setAlarmLevel(context.alarmLevel + 5);
 }
 
 void Courthouse::onDestroyed(BattleContext& context) {
     // TODO: implement
+    context.setAlarmLevel(context.alarmLevel - 20);
 }
 
 /*
@@ -1078,6 +1084,13 @@ TowerOfJustice::TowerOfJustice(string name, int hp) : Building(name, hp) {}
 
 void TowerOfJustice::applyEffect(BattleContext& context) {
     // TODO: implement
+    if (context.mainGateDestroyed && !context.robinRescued) {
+        context.setRescueProgress(context.rescueProgress + 5);
+    }
+    if (context.rescueProgress >= 100) {
+        context.robinRescued = true;
+        //context.setMorale(context.morale + 10);
+    }
 }
 
 /*
@@ -1087,6 +1100,13 @@ BridgeOfHesitation::BridgeOfHesitation(string name, int hp) : Building(name, hp)
 
 void BridgeOfHesitation::applyEffect(BattleContext& context) {
     // TODO: implement
+    if (context.robinRescued) {
+        context.bridgeOpened = true;
+        context.setEscapeProgress(context.escapeProgress + 5);
+    }
+    if (context.escapeProgress >= 100) {
+        // Fight end with STAW_HAT_WIN
+    }
 }
 
 /*
@@ -1096,10 +1116,17 @@ BusterCallShip::BusterCallShip(string name, int hp) : Building(name, hp) {}
 
 void BusterCallShip::applyEffect(BattleContext& context) {
     // TODO: implement
+    if (!isDestroyed()) {
+        context.setBusterCallTimer(context.busterCallTimer - 1);
+    }
+    if (context.busterCallTimer <= 0) {
+        // Fight end with BUSTER CALL
+    }
 }
 
 void BusterCallShip::onDestroyed(BattleContext& context) {
     // TODO: implement
+    context.setBusterCallTimer(context.busterCallTimer + 3);
 }
 
 /*
