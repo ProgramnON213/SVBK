@@ -18,9 +18,6 @@ int const MAX_BUILDING_COUNT = 5;
  */
 class Character {
 protected:
-    bool killInTurn;
-
-protected:
     string name;
     int hp;
     int maxHp;
@@ -30,6 +27,7 @@ protected:
     int energy;
     int energyRequirement;
     bool alive;
+    bool killInTurn;
 
 public:
     Character();
@@ -57,12 +55,14 @@ public:
     int getEnergy() const;
     int getDef() const;
     int getSpeed() const;
+    int getEnergyRequirement() const;
 
     void setName(string name);
     void setHPandState(int hp);
     void setEnergy(int energy);
     void setDef(int def);
     void setSpeed(int speed);
+    void setKillInTurn(bool value);
 
     virtual bool isStrawHat() const;
     virtual bool isCP9() const;
@@ -291,6 +291,8 @@ public:
     Fukurou(string name, int hp, int atk, int def,
             int speed, int energy, int doriki);
 
+    Character* lowestHPStrawHat;    
+
     //int attack(Character* target, BattleContext& context);
     int specialSkill(Character* target, BattleContext& context);
     void endTurn(BattleContext& context);
@@ -419,6 +421,7 @@ private:
     Building** buildings;
     int buildingCount;
 
+    bool battleEnded;
     TurnNode* turnOrder;
     BattleContext context;
     int maxTurns;
@@ -436,13 +439,26 @@ public:
     void addBuilding(Building* building);
 
     void buildTurnOrder();
+    void deleteTurnOrder(TurnNode* turnOrder);
+    void moveNodeToEnd(TurnNode* turnOrder);
 
     void runBattle();
+    void selectTarget(Character* character, BattleContext& context, 
+        Character* targetCharacter, Building* targetBuilding);
+    void selectTargetStrawHat(Character* character, BattleContext& context, 
+        Character* targetCharacter, Building* targetBuilding);
     void processTurn(Character* character);
     void processBuildings();
     void checkEndCondition();
+    bool isAllStrawHatDead();
+    bool isAllCP9AgentDead();
 
     string getResult() const;
+    Character* firstStrawHatAlive() const;
+    Character* firstCP9AgentAlive() const;
+    Character* lowestHPCharacterInStrawHat() const;
+
+    Building* findBuildingWithName(string name);
 };
 
 

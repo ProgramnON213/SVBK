@@ -1,5 +1,5 @@
 #include "eniesLobby.h"
-
+// REMINDER: Add the morale system back
 /*
  * BattleContext
  */
@@ -19,6 +19,7 @@ BattleContext::BattleContext() {
 
 BattleContext::BattleContext(int morale, int alarmLevel, int rescueProgress, 
         int escapeProgress, int busterCallTimer) {
+    turnCount = 0;
     setMorale(morale);
     setAlarmLevel(alarmLevel);
     setRescueProgress(rescueProgress);
@@ -28,6 +29,7 @@ BattleContext::BattleContext(int morale, int alarmLevel, int rescueProgress,
     robinRescued = false;
     bridgeOpened = false;
     battleEnded = false;
+    resultCode = "";
 }
 
 void BattleContext::nextTurn() {
@@ -176,6 +178,10 @@ void Character::setEnergy(int energy) {
     this->energy = setByCondition(energy);
 }
 
+int Character::getEnergyRequirement() const {
+    return energyRequirement;
+}
+
 int Character::getDef() const {
     return def;
 }
@@ -189,6 +195,10 @@ int Character::getSpeed() const {
 }
 void Character::setSpeed(int speed) {
     this->speed = speed;
+}
+
+void Character::setKillInTurn(bool value) {
+    this->killInTurn = value;
 }
 
 bool Character::isStrawHat() const {
@@ -1005,7 +1015,7 @@ Fukurou::Fukurou(string name, int hp, int atk, int def,
 int Fukurou::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
     int damage = ceil(1.3 * atk);
-    if (true) {     // REMINDER: check if target is lowest HP of StawHat
+    if (target == lowestHPStrawHat) {
         damage += 20;
     }
 
@@ -1087,7 +1097,7 @@ MainGate::MainGate(string name, int hp) : Building(name, hp) {}
 
 void MainGate::applyEffect(BattleContext& context) {
     // TODO: implement
-    // REMINDER: if not destroyed, rescueProgress will not increase in this turn
+    // if not destroyed, rescueProgress will not increase in this turn
 }
 
 void MainGate::onDestroyed(BattleContext& context) {
@@ -1178,7 +1188,7 @@ EniesLobbyBattle::EniesLobbyBattle(const string& filename) {
     buildings = new Building* [MAX_BUILDING_COUNT];
     buildingCount = 0;
 
-    result = "";
+    battleEnded = false;
 
     loadFromFile(filename);
 }
@@ -1199,6 +1209,8 @@ EniesLobbyBattle::~EniesLobbyBattle() {
         delete buildings[i];
     }
     delete[] buildings;
+
+    deleteTurnOrder(turnOrder);
 }
 
 void EniesLobbyBattle::loadFromFile(const string& filename) {
@@ -1339,14 +1351,127 @@ void EniesLobbyBattle::addBuilding(Building* building) {
 
 void EniesLobbyBattle::buildTurnOrder() {
     // TODO: implement
+    TurnNode* turnOrder = new TurnNode;
+    TurnNode* current = turnOrder;
+
+    for (int i = 0; i < strawHatCount; i++) {
+        current->data = strawHats[i];
+        current->next = new TurnNode;
+        current = current->next;
+    }
+
+    for (int i = 0; i < cp9Count; i++) {
+        current->data = cp9Agents[i];
+        current->next = new TurnNode;
+        current = current->next;
+    }
+
+    current = nullptr;
+}
+
+void EniesLobbyBattle::deleteTurnOrder(TurnNode* turnOder) {
+    TurnNode* current = turnOder;
+    while (current != nullptr) {
+        TurnNode* next = turnOder->next;
+        delete current;
+        current = next;
+    }
+}
+
+void EniesLobbyBattle::moveNodeToEnd(TurnNode* turnOrder) {
+    TurnNode* temp = turnOrder;
+
+    TurnNode* current = turnOrder;
+    while (current != nullptr) {
+        current = current->next;
+    }
+    current = temp;
+
+    turnOrder = turnOrder->next;
 }
 
 void EniesLobbyBattle::runBattle() {
     // TODO: implement
+    while (!battleEnded) {
+        if (turnOrder->data->isAlive()) {
+            Character* character = turnOrder->data;
+            processTurn(character);
+        }
+
+        moveNodeToEnd(turnOrder);
+
+        processBuildings();
+
+        context.nextTurn();
+
+        checkEndCondition();
+    }
 }
+
+void EniesLobbyBattle::selectTarget(Character* character, BattleContext& context, 
+    Character* targetCharacter, Building* targetBuilding) {
+    targetCharacter = nullptr;
+    targetBuilding = nullptr;
+    
+    if (character->isStrawHat()) {
+        selectTargetStrawHat(character, context, targetCharacter, targetBuilding);
+    }
+    else if (character->isCP9()) {
+        targetCharacter = firstStrawHatAlive();
+    }
+}
+
+void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext& context, 
+    Character* targetCharacter, Building* targetBuilding) {
+        if (character->getName() == "Chopper" && character->getEnergy() >= character->getEnergyRequirement()) {
+            targetCharacter = lowestHPCharacterInStrawHat();
+        }
+        else if (!context.mainGateDestroyed) {
+            targetBuilding = findBuildingWithName("MainGate");
+        }
+        else if (context.alarmLevel >= 50 && !findBuildingWithName("Courthouse")->isDestroyed()) {
+            targetBuilding = findBuildingWithName("Courthouse");
+        }
+        else if (context.busterCallTimer <= 5 && !findBuildingWithName("BusterCallShip")->isDestroyed()) {
+            targetBuilding = findBuildingWithName("BusterCallShip");
+        }
+        else if (!context.robinRescued) {
+            targetCharacter = firstCP9AgentAlive();
+        }
+        else if (context.robinRescued) {
+            targetBuilding = findBuildingWithName("BridgeOfHesitation");
+            if (targetBuilding->isDestroyed()) {
+                targetCharacter = firstCP9AgentAlive();
+                targetBuilding = nullptr;
+            }
+        }
+    }
 
 void EniesLobbyBattle::processTurn(Character* character) {
     // TODO: implement
+    Character* targetCharacter; Building* targetBuilding;
+    selectTarget(character, context, targetCharacter, targetBuilding);
+    character->setKillInTurn(false);
+    if (character->getName() == "Fukurou") {
+        Fukurou* fukurouPtr = (Fukurou*) character;
+        fukurouPtr->lowestHPStrawHat = lowestHPCharacterInStrawHat();
+    }
+
+    if (targetCharacter != nullptr) {
+        character->takeTurn(targetCharacter, context);
+        if (!targetCharacter->isAlive()) {
+            character->setKillInTurn(true);
+        }
+    }
+    else if (targetBuilding != nullptr) {
+        character->takeTurn(targetBuilding, context);
+        if (targetBuilding->isDestroyed()) {
+            targetBuilding->onDestroyed(context);
+            character->setKillInTurn(true);
+        }
+    }
+
+    character->endTurn(context);
 }
 
 void EniesLobbyBattle::processBuildings() {
@@ -1362,25 +1487,86 @@ void EniesLobbyBattle::processBuildings() {
 void EniesLobbyBattle::checkEndCondition() {
     // TODO: implement
     if (context.robinRescued && context.escapeProgress >= 100) {
-        result = "STRAW_HAT_WIN";
+        battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN";
     }
     else if (context.busterCallTimer <= 0) {
-        result = "BUSTER_CALL";
+        battleEnded = true;
+        context.resultCode = "BUSTER_CALL";
     }
-    else if (true) {
-        result = "CP9_WIN";
-    }   // REMINDER: All strawHats dead
-    else if (true) {
-        result = "STRAW_HAT_WIN_BY_DEFEAT_CP9";
-    }   // REMINDER: All cp9Agents dead
+    else if (isAllStrawHatDead()) {
+        battleEnded = true;
+        context.resultCode = "CP9_WIN";
+    }  
+    else if (isAllCP9AgentDead()) {
+        battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN_BY_DEFEAT_CP9";
+    }
     else if (context.turnCount >= maxTurns) {
-        result = "TIME_OUT";
+        battleEnded = true;
+        context.resultCode = "TIME_OUT";
     }
+}
+
+bool EniesLobbyBattle::isAllStrawHatDead() {
+    for (int i = 0; i < strawHatCount; i++) {
+        if (strawHats[i]->isAlive()) {return false;}
+    }
+    return true;
+}
+bool EniesLobbyBattle::isAllCP9AgentDead() {
+    for (int i = 0; i < cp9Count; i++) {
+        if (cp9Agents[i]->isAlive()) {return false;}
+    }
+    return true;
 }
 
 string EniesLobbyBattle::getResult() const {
     // TODO: implement
-    return result;
+    return context.resultCode;
+}
+
+Character* EniesLobbyBattle::firstStrawHatAlive() const {
+    int i = 0;
+    while(!strawHats[i]->isAlive() && i < strawHatCount) {
+        i++;
+    }
+    if (i >= strawHatCount) {return nullptr;}
+    return strawHats[i];
+}
+
+Character* EniesLobbyBattle::firstCP9AgentAlive() const {
+    int i = 0;
+    while (cp9Agents[i]->isAlive() && i < cp9Count) {
+        i++;
+    }
+    if (i >= cp9Count) {return nullptr;}
+    return cp9Agents[i];
+}
+
+Character* EniesLobbyBattle::lowestHPCharacterInStrawHat() const {
+    Character* resultCharacter = nullptr;
+    int minHp = firstStrawHatAlive()->getHP();
+
+    for (int i = 0; i < strawHatCount; i++) {
+        Character* current = strawHats[i];
+        if (current->isAlive() && current->getHP() < minHp) {
+            minHp = current->getHP();
+            resultCharacter = current;
+        }
+    }
+
+    return resultCharacter;
+}
+
+Building* EniesLobbyBattle::findBuildingWithName(string name) {
+    for (int i = 0; i < buildingCount; i++) {
+        Building* current = buildings[i];
+        if (current->getName() == name) {
+            return current;
+        }
+    }
+    return nullptr;
 }
 
 int setByCondition(int n, int min, int max) {
