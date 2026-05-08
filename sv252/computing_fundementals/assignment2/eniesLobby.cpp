@@ -1236,32 +1236,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             long long bounty;
             stream >> name >> hp >> atk >> def >> speed >> energy >> bounty;
 
-            StrawHat* pirate;
-            if (name == "Luffy") {
-                pirate = new Luffy(name, hp, atk, def, speed, energy, bounty);
-            }
-            else if (name == "Zoro") {
-                pirate = new Zoro(name, hp, atk, def, speed, energy, bounty);
-            }
-            else if (name == "Sanji") {
-                pirate = new Sanji(name, hp, atk, def, speed, energy, bounty);
-            }
-            else if (name == "Nami") {
-                pirate = new Nami(name, hp, atk, def, speed, energy, bounty);
-            }
-            else if (name == "Chopper") {
-                pirate = new Chopper(name, hp, atk, def, speed, energy, bounty);
-            }
-            else if (name == "Usopp") {
-                pirate = new Usopp(name, hp, atk, def, speed, energy, bounty);
-            }
-            else if (name == "Franky") {
-                pirate = new Franky(name, hp, atk, def, speed, energy, bounty);
-            }
-            else {
-                pirate = nullptr;
-            }
-
+            StrawHat* pirate = createStrawHat(name, hp, atk, def, speed, energy, bounty);
             addStrawHat(pirate);
         }
 
@@ -1270,32 +1245,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             int hp, atk, def, speed, energy, doriki;
             stream >> name >> hp >> atk >> def >> speed >> energy >> doriki;
 
-            CP9Agent* agent;
-            if (name == "Lucci") {
-                agent = new Lucci(name, hp, atk, def, speed, energy, doriki);
-            }
-            else if (name == "Kaku") {
-                agent = new Kaku(name, hp, atk, def, speed, energy, doriki);
-            }
-            else if (name == "Jabra") {
-                agent = new Jabra(name, hp, atk, def, speed, energy, doriki);
-            }
-            else if (name == "Blueno") {
-                agent = new Blueno(name, hp, atk, def, speed, energy, doriki);
-            }
-            else if (name == "Kalifa") {
-                agent = new Kalifa(name, hp, atk, def, speed, energy, doriki);
-            }
-            else if (name == "Kumadori") {
-                agent = new Kumadori(name, hp, atk, def, speed, energy, doriki);
-            }
-            else if (name == "Fukurou") {
-                agent = new Fukurou(name, hp, atk, def, speed, energy, doriki);
-            }
-            else {
-                agent = nullptr;
-            }
-
+            CP9Agent* agent = createCP9Agent(name, hp, atk, def, speed, energy, doriki);
             addCP9Agent(agent);
         }
 
@@ -1303,32 +1253,43 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             string name;
             int hp;
             stream >> name >> hp;
-            Building* building;
 
-            if (name == "MainGate") {
-                building = new MainGate(name, hp);
-            }
-            else if (name == "Courthouse") {
-                building = new Courthouse(name, hp);
-            }
-            else if (name == "TowerOfJustice") {
-                building = new TowerOfJustice(name, hp);
-            }
-            else if (name == "BridgeOfHesitation") {
-                building = new BridgeOfHesitation(name, hp);
-            }
-            else if (name == "BusterCallShip") {
-                building = new BusterCallShip(name, hp);
-            }
-            else {
-                building = nullptr;
-            }
-
+            Building* building = createBuilding(name, hp);
             addBuilding(building);
         }
     }
 
     buildTurnOrder();
+}
+
+StrawHat* EniesLobbyBattle::createStrawHat(string name, int hp, int atk, int def, int speed, 
+    int energy, long long bounty) {
+    StrawHat* pirate = nullptr;
+    if (name == "Luffy") {
+        pirate = new Luffy(name, hp, atk, def, speed, energy, bounty);
+    }
+    else if (name == "Zoro") {
+        pirate = new Zoro(name, hp, atk, def, speed, energy, bounty);
+    }
+    else if (name == "Sanji") {
+        pirate = new Sanji(name, hp, atk, def, speed, energy, bounty);
+    }
+    else if (name == "Nami") {
+        pirate = new Nami(name, hp, atk, def, speed, energy, bounty);
+    }
+    else if (name == "Chopper") {
+        pirate = new Chopper(name, hp, atk, def, speed, energy, bounty);
+    }
+    else if (name == "Usopp") {
+        pirate = new Usopp(name, hp, atk, def, speed, energy, bounty);
+    }
+    else if (name == "Franky") {
+        pirate = new Franky(name, hp, atk, def, speed, energy, bounty);
+    }
+    else {
+        pirate = nullptr;
+    }
+    return pirate;
 }
 
 void EniesLobbyBattle::addStrawHat(Character* character) {
@@ -1337,10 +1298,63 @@ void EniesLobbyBattle::addStrawHat(Character* character) {
     strawHatCount++;
 }
 
+CP9Agent* EniesLobbyBattle::createCP9Agent(string name, int hp, int atk, int def, int speed, 
+    int energy, int doriki) {
+    CP9Agent* agent = nullptr;
+    if (name == "Lucci") {
+        agent = new Lucci(name, hp, atk, def, speed, energy, doriki);
+    }
+    else if (name == "Kaku") {
+        agent = new Kaku(name, hp, atk, def, speed, energy, doriki);
+    }
+    else if (name == "Jabra") {
+        agent = new Jabra(name, hp, atk, def, speed, energy, doriki);
+    }
+    else if (name == "Blueno") {
+        agent = new Blueno(name, hp, atk, def, speed, energy, doriki);
+    }
+    else if (name == "Kalifa") {
+        agent = new Kalifa(name, hp, atk, def, speed, energy, doriki);
+    }
+    else if (name == "Kumadori") {
+        agent = new Kumadori(name, hp, atk, def, speed, energy, doriki);
+    }
+    else if (name == "Fukurou") {
+        agent = new Fukurou(name, hp, atk, def, speed, energy, doriki);
+    }
+    else {
+        agent = nullptr;
+    }
+    return agent;
+}
+
 void EniesLobbyBattle::addCP9Agent(Character* character) {
     // TODO: implement
     cp9Agents[cp9Count] = character;
     cp9Count++;
+}
+
+Building* EniesLobbyBattle::createBuilding(string name, int hp) {
+    Building* building = nullptr;
+    if (name == "MainGate") {
+        building = new MainGate(name, hp);
+    }
+    else if (name == "Courthouse") {
+        building = new Courthouse(name, hp);
+    }
+    else if (name == "TowerOfJustice") {
+        building = new TowerOfJustice(name, hp);
+    }
+    else if (name == "BridgeOfHesitation") {
+        building = new BridgeOfHesitation(name, hp);
+    }
+    else if (name == "BusterCallShip") {
+        building = new BusterCallShip(name, hp);
+    }
+    else {
+        building = nullptr;
+    }
+    return building;
 }
 
 void EniesLobbyBattle::addBuilding(Building* building) {
@@ -1397,7 +1411,7 @@ void EniesLobbyBattle::runBattle() {
             Character* character = turnOrder->data;
             processTurn(character);
         }
-
+        
         moveNodeToEnd(turnOrder);
 
         processBuildings();
@@ -1577,4 +1591,16 @@ int setByCondition(int n, int min, int max) {
         return max;
     }
     return n;
+}
+
+void EniesLobbyBattle::tempLog() {
+    for (int i = 0; i < strawHatCount; i++) {
+        cout << strawHats[i]->str() << endl;
+    }
+    for (int i = 0; i < cp9Count; i++) {
+        cout << cp9Agents[i]->str() << endl;
+    }
+    for (int i = 0; i < buildingCount; i++) {
+        cout << buildings[i]->str() << endl;
+    }
 }

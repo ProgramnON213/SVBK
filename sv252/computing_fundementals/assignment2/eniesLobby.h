@@ -434,8 +434,13 @@ public:
 
     void loadFromFile(const string& filename);
 
+    StrawHat* createStrawHat(string name, int hp, int atk, int def, int speed, 
+    int energy, long long bounty);
     void addStrawHat(Character* character);
+    CP9Agent* createCP9Agent(string name, int hp, int atk, int def, int speed, 
+        int energy, int doriki);
     void addCP9Agent(Character* character);
+    Building* createBuilding(string name, int hp);
     void addBuilding(Building* building);
 
     void buildTurnOrder();
@@ -459,6 +464,8 @@ public:
     Character* lowestHPCharacterInStrawHat() const;
 
     Building* findBuildingWithName(string name);
+
+    void tempLog();
 };
 
 
