@@ -326,6 +326,8 @@ public:
     void setRescueProgress(int rescueProgress);
     void setEscapeProgress(int escapeProgress);
     void setBusterCallTimer(int busterCallTimer);
+
+    void logContext() const;
 };
 
 /*
@@ -426,8 +428,6 @@ private:
     BattleContext context;
     int maxTurns;
 
-    string result;
-
 public:
     EniesLobbyBattle(const string& filename);
     ~EniesLobbyBattle();
@@ -444,14 +444,14 @@ public:
     void addBuilding(Building* building);
 
     void buildTurnOrder();
-    void deleteTurnOrder(TurnNode* turnOrder);
-    void moveNodeToEnd(TurnNode* turnOrder);
+    void deleteTurnOrder();
+    void moveNodeToEnd();
 
     void runBattle();
     void selectTarget(Character* character, BattleContext& context, 
-        Character* targetCharacter, Building* targetBuilding);
+        Character*& targetCharacter, Building*& targetBuilding);
     void selectTargetStrawHat(Character* character, BattleContext& context, 
-        Character* targetCharacter, Building* targetBuilding);
+        Character*& targetCharacter, Building*& targetBuilding);
     void processTurn(Character* character);
     void processBuildings();
     void checkEndCondition();
@@ -466,10 +466,11 @@ public:
     Building* findBuildingWithName(string name);
 
     void tempLog();
+    void tempLogObjects();
+    void tempLogTurnNode();
 };
 
 
 int setByCondition(int n, int min=0, int max=100);
-
 
 #endif

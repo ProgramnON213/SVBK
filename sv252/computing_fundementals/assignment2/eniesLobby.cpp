@@ -1,5 +1,6 @@
 #include "eniesLobby.h"
 // REMINDER: Add the morale system back
+// REMINDER: attack and specialSkill return value should be actual damage
 /*
  * BattleContext
  */
@@ -65,6 +66,16 @@ void BattleContext::setBusterCallTimer(int busterCallTimer) {
         this->busterCallTimer = busterCallTimer;
     }
 };
+
+void BattleContext::logContext() const {
+    cout << "Logging context" << endl;
+    cout << boolalpha << "turnCount=" << turnCount << ", morale=" << morale << ", alarmLevel=" << alarmLevel << 
+    ", rescueProgress=" << rescueProgress << ", escapeProgress=" << escapeProgress <<
+    ", busterCallTimer=" << busterCallTimer << ", mainGateDestroyed=" << mainGateDestroyed <<
+    ", robinRescued=" << robinRescued << ", bridgeOpened=" << bridgeOpened << 
+    ", battleEnded=" << battleEnded << ", resultCode=" << resultCode << endl;
+    cout << "Logging context completed" << endl;
+}
 
 /*
  * Character
@@ -291,6 +302,7 @@ int Luffy::takeTurn(Building* target, BattleContext& context) {
 
 int Luffy::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = calculateAttackDamge();
 
     target->receiveDamage(damage);
@@ -299,20 +311,19 @@ int Luffy::attack(Character* target, BattleContext& context) {
         //context.setMorale(context.morale + 5);
     }
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Luffy::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = calculateAttackDamge();
 
     target->receiveDamage(damage);
 
-    if (target->isDestroyed()) {
-        //context.setMorale(context.morale + 5);
-    }
-
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Luffy::calculateSkillDamage(BattleContext& context) {
@@ -327,20 +338,24 @@ int Luffy::calculateSkillDamage(BattleContext& context) {
 
 int Luffy::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = calculateSkillDamage(context);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Luffy::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = calculateSkillDamage(context);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Luffy::endTurn(BattleContext& context) {
@@ -364,6 +379,7 @@ Zoro::Zoro(string name, int hp, int atk, int def,
 
 int Zoro::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk + ceil(0.2 * def);
     if (target->getHP() < ceil(0.4 * target->getMaxHP())) {
         damage = ceil(1.15 * damage);
@@ -371,11 +387,13 @@ int Zoro::attack(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Zoro::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk + ceil(0.2 * def);
     if (target->getHP() < ceil(0.4 * target->getMaxHP())) {
         damage = ceil(1.15 * damage);
@@ -383,11 +401,13 @@ int Zoro::attack(Building* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Zoro::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(2.2 * atk);
     if (target->getHP() < ceil(0.5) * target->getMaxHP()) {
         damage = ceil(1.5 * damage);
@@ -399,23 +419,23 @@ int Zoro::specialSkill(Character* target, BattleContext& context) {
         setEnergy(energy + 8);
         //context.setMorale(context.morale + 4);
     }
-    return damage;
+
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Zoro::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(2.2 * atk);
     if (target->getHP() < ceil(0.5) * target->getMaxHP()) {
         damage = ceil(1.5 * damage);
     }
 
     target->receiveDamage(damage);
-
-    if ((target->isDestroyed())) {
-        setEnergy(energy + 8);
-        //context.setMorale(context.morale + 4);
-    }
-    return damage;
+    
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Zoro::endTurn(BattleContext& context) {
@@ -437,6 +457,7 @@ Sanji::Sanji(string name, int hp, int atk, int def,
 
 int Sanji::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk + ceil(0.5*speed);
     if (target->getDef() < def) {
         damage = ceil(damage * 1.1);
@@ -444,20 +465,24 @@ int Sanji::attack(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Sanji::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk + ceil(0.5*speed);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Sanji::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(2.1 * atk);
 
     target->receiveDamage(damage);
@@ -469,16 +494,19 @@ int Sanji::specialSkill(Character* target, BattleContext& context) {
         target->setDef(target->getDef() - 8);
     }
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Sanji::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(2.1 * atk);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Sanji::endTurn(BattleContext& context) {
@@ -500,6 +528,7 @@ Nami::Nami(string name, int hp, int atk, int def,
 
 int Nami::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk;
 
     int tempDef = target->getDef();
@@ -507,16 +536,19 @@ int Nami::attack(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
     target->setDef(tempDef);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Nami::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(0.5*atk);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Nami::skillEffect(BattleContext& context) const {
@@ -526,6 +558,7 @@ void Nami::skillEffect(BattleContext& context) const {
 
 int Nami::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk + 40;
 
     target->receiveDamage(damage);
@@ -533,11 +566,13 @@ int Nami::specialSkill(Character* target, BattleContext& context) {
 
     skillEffect(context);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Nami::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = (atk + 40);
     damage = ceil(1.5 * damage);
 
@@ -545,7 +580,8 @@ int Nami::specialSkill(Building* target, BattleContext& context) {
 
     skillEffect(context);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Nami::endTurn(BattleContext& context) {
@@ -569,20 +605,24 @@ Chopper::Chopper(string name, int hp, int atk, int def,
 
 int Chopper::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk;
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Chopper::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk;
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Chopper::specialSkill(Character* target, BattleContext& context) {
@@ -594,7 +634,7 @@ int Chopper::specialSkill(Character* target, BattleContext& context) {
         //context.setMorale(context.morale + 5);
     }
 
-    return heal;
+    return 0;
 }
 
 void Chopper::endTurn(BattleContext& context) {
@@ -615,6 +655,7 @@ Usopp::Usopp(string name, int hp, int atk, int def,
 
 int Usopp::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk;
     if (target->getSpeed() < 50) {
         damage = ceil(1.2 * damage);
@@ -622,20 +663,24 @@ int Usopp::attack(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Usopp::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(0.5 * atk);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Usopp::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(0.8 * atk);
 
     target->receiveDamage(damage);
@@ -643,18 +688,21 @@ int Usopp::specialSkill(Character* target, BattleContext& context) {
 
     context.setEscapeProgress(context.escapeProgress + 8);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Usopp::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(0.8 * atk);
 
     target->receiveDamage(damage);
 
     context.setEscapeProgress(context.escapeProgress + 8);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Usopp::endTurn(BattleContext& context) {
@@ -701,6 +749,7 @@ int Franky::takeTurn(Building* target, BattleContext& context) {
 
 int Franky::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(atk + 0.3*def);
     if (target->isCP9()) {
         damage = ceil(1.1 * damage);
@@ -708,18 +757,22 @@ int Franky::attack(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Franky::attack(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(atk + 0.3*def);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
+// REMINDER: May need to implement this
 int Franky::specialSkill(Character* target, BattleContext& context) {
     return 0;
 }
@@ -729,6 +782,7 @@ int Franky::specialSkill(Building* target, BattleContext& context) {
 
 int Franky::specialSkill1(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(1.8 * atk);
     if (target->getName() == "LUCCI") {
         damage = ceil(1.2 * damage);
@@ -737,11 +791,13 @@ int Franky::specialSkill1(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
     target->setSpeed(target->getSpeed() - 8);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Franky::specialSkill1(Building* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(1.8 * atk);
     if (target->getName() == "LUCCI") {
         damage = ceil(1.2 * damage);
@@ -749,23 +805,28 @@ int Franky::specialSkill1(Building* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Franky::specialSkill2(Character* target, BattleContext& context) {
+    int hp1 = target->getHP();
     int damage = ceil(1.2 * atk);
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Franky::specialSkill2(Building* target, BattleContext& context) {
+    int hp1 = target->getHP();
     int damage = target->getHP();
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Franky::endTurn(BattleContext& context) {
@@ -808,11 +869,13 @@ string CP9Agent::str() const {
 
 int CP9Agent::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk;
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int CP9Agent::specialSkill(Character* target, BattleContext& context) {
@@ -830,6 +893,7 @@ Lucci::Lucci(string name, int hp, int atk, int def,
 
 int Lucci::attack(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = atk + ceil(0.05 * doriki);
     if (target->getHP() < target->getMaxHP()) {
         damage = ceil(1.2 * damage);
@@ -837,11 +901,13 @@ int Lucci::attack(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 int Lucci::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(2.8 * atk);
 
     int tempDef = target->getDef();
@@ -852,7 +918,9 @@ int Lucci::specialSkill(Character* target, BattleContext& context) {
     if (!target->isAlive()) {
         //context.setMorale(context.morale - 10);
     }
-    return damage;
+
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Lucci::endTurn(BattleContext& context) {
@@ -873,14 +941,23 @@ Kaku::Kaku(string name, int hp, int atk, int def,
 
 int Kaku::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
+
     int damage1 = ceil(1.2 * atk);
-    int damage2 = atk;
-    int damage3 = ceil(0.8 * atk);
-    int totalDamage = damage1 + damage2 + damage3;
+    target->receiveDamage(damage1);
 
-    target->receiveDamage(totalDamage);
+    if (target->isAlive()) {
+        int damage2 = atk;
+        target->receiveDamage(damage2);
+    }
 
-    return totalDamage;
+    if (target->isAlive()) {
+        int damage3 = ceil(0.8 * atk);
+        target->receiveDamage(damage3);
+    }
+
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Kaku::endTurn(BattleContext& context) {
@@ -899,6 +976,7 @@ Jabra::Jabra(string name, int hp, int atk, int def,
 
 int Jabra::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(1.5 * atk);
     if (hp < ceil(0.3 * maxHp)) {
         damage = ceil(1.25 * damage);
@@ -910,7 +988,8 @@ int Jabra::specialSkill(Character* target, BattleContext& context) {
         //context.setMorale(context.morale - 5);
     }
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Jabra::endTurn(BattleContext& context) {
@@ -929,6 +1008,7 @@ Blueno::Blueno(string name, int hp, int atk, int def,
 
 int Blueno::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(1.3 * atk);
     if (hp > ceil(0.5 * maxHp)) {
         damage += 20;
@@ -939,7 +1019,8 @@ int Blueno::specialSkill(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Blueno::endTurn(BattleContext& context) {
@@ -958,6 +1039,7 @@ Kalifa::Kalifa(string name, int hp, int atk, int def,
 
 int Kalifa::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(1.4 * atk);
 
     target->receiveDamage(damage);
@@ -969,7 +1051,9 @@ int Kalifa::specialSkill(Character* target, BattleContext& context) {
     else {
         //context.setMorale(context.morale - 8);
     }
-    return damage;
+
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Kalifa::endTurn(BattleContext& context) {
@@ -988,6 +1072,7 @@ Kumadori::Kumadori(string name, int hp, int atk, int def,
 
 int Kumadori::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = 30 + ceil(0.1 * doriki);
     if (hp < ceil(0.4 * maxHp)) {
         damage += 25;
@@ -995,7 +1080,8 @@ int Kumadori::specialSkill(Character* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    return damage;
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Kumadori::endTurn(BattleContext& context) {
@@ -1014,6 +1100,7 @@ Fukurou::Fukurou(string name, int hp, int atk, int def,
 
 int Fukurou::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    int hp1 = target->getHP();
     int damage = ceil(1.3 * atk);
     if (target == lowestHPStrawHat) {
         damage += 20;
@@ -1024,7 +1111,9 @@ int Fukurou::specialSkill(Character* target, BattleContext& context) {
     if (!target->isAlive()) {
         //context.setMorale(context.morale - 6);
     }
-    return 0;
+    
+    int hp2 = target->getHP();
+    return hp1 - hp2;
 }
 
 void Fukurou::endTurn(BattleContext& context) {
@@ -1166,6 +1255,8 @@ void BusterCallShip::applyEffect(BattleContext& context) {
     }
     if (context.busterCallTimer <= 0) {
         // Fight end with BUSTER CALL
+        context.battleEnded = true;
+        context.resultCode = "BUSTER CALL";
     }
 }
 
@@ -1210,7 +1301,7 @@ EniesLobbyBattle::~EniesLobbyBattle() {
     }
     delete[] buildings;
 
-    deleteTurnOrder(turnOrder);
+    deleteTurnOrder();
 }
 
 void EniesLobbyBattle::loadFromFile(const string& filename) {
@@ -1365,43 +1456,58 @@ void EniesLobbyBattle::addBuilding(Building* building) {
 
 void EniesLobbyBattle::buildTurnOrder() {
     // TODO: implement
-    TurnNode* turnOrder = new TurnNode;
-    TurnNode* current = turnOrder;
+    turnOrder = nullptr;
+    TurnNode* tail = turnOrder;
 
     for (int i = 0; i < strawHatCount; i++) {
-        current->data = strawHats[i];
-        current->next = new TurnNode;
-        current = current->next;
+        TurnNode* newNode = new TurnNode;
+        newNode->data = strawHats[i];
+        newNode->next = nullptr;
+        if (turnOrder == nullptr) {
+            turnOrder = newNode;
+        }
+        else {
+            tail->next = newNode;
+        }
+        tail = newNode;
     }
 
     for (int i = 0; i < cp9Count; i++) {
-        current->data = cp9Agents[i];
-        current->next = new TurnNode;
-        current = current->next;
+        TurnNode* newNode = new TurnNode;
+        newNode->data = cp9Agents[i];
+        newNode->next = nullptr;
+        if (turnOrder == nullptr) {
+            turnOrder = newNode;
+        }
+        else {
+            tail->next = newNode;
+        }
+        tail = newNode;
     }
-
-    current = nullptr;
 }
 
-void EniesLobbyBattle::deleteTurnOrder(TurnNode* turnOder) {
-    TurnNode* current = turnOder;
+void EniesLobbyBattle::deleteTurnOrder() {
+    TurnNode* current = turnOrder;
     while (current != nullptr) {
-        TurnNode* next = turnOder->next;
+        TurnNode* next = turnOrder->next;
         delete current;
         current = next;
     }
 }
 
-void EniesLobbyBattle::moveNodeToEnd(TurnNode* turnOrder) {
+void EniesLobbyBattle::moveNodeToEnd() {
+    if (turnOrder == nullptr || turnOrder->next == nullptr) {return;}
+    
     TurnNode* temp = turnOrder;
 
     TurnNode* current = turnOrder;
-    while (current != nullptr) {
+    while (current->next != nullptr) {
         current = current->next;
     }
-    current = temp;
-
     turnOrder = turnOrder->next;
+
+    current->next = temp;
+    current->next->next = nullptr;
 }
 
 void EniesLobbyBattle::runBattle() {
@@ -1409,21 +1515,24 @@ void EniesLobbyBattle::runBattle() {
     while (!battleEnded) {
         if (turnOrder->data->isAlive()) {
             Character* character = turnOrder->data;
-            processTurn(character);
+            processTurn(character); // Bug here
         }
         
-        moveNodeToEnd(turnOrder);
+        moveNodeToEnd();
 
         processBuildings();
 
         context.nextTurn();
 
         checkEndCondition();
+
+        tempLogTurnNode();
+        tempLogObjects();
     }
 }
 
 void EniesLobbyBattle::selectTarget(Character* character, BattleContext& context, 
-    Character* targetCharacter, Building* targetBuilding) {
+    Character*& targetCharacter, Building*& targetBuilding) {
     targetCharacter = nullptr;
     targetBuilding = nullptr;
     
@@ -1436,7 +1545,7 @@ void EniesLobbyBattle::selectTarget(Character* character, BattleContext& context
 }
 
 void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext& context, 
-    Character* targetCharacter, Building* targetBuilding) {
+    Character*& targetCharacter, Building*& targetBuilding) {
         if (character->getName() == "Chopper" && character->getEnergy() >= character->getEnergyRequirement()) {
             targetCharacter = lowestHPCharacterInStrawHat();
         }
@@ -1481,7 +1590,6 @@ void EniesLobbyBattle::processTurn(Character* character) {
         character->takeTurn(targetBuilding, context);
         if (targetBuilding->isDestroyed()) {
             targetBuilding->onDestroyed(context);
-            character->setKillInTurn(true);
         }
     }
 
@@ -1594,6 +1702,11 @@ int setByCondition(int n, int min, int max) {
 }
 
 void EniesLobbyBattle::tempLog() {
+    context.logContext();
+}
+
+void EniesLobbyBattle::tempLogObjects() {
+    cout << "Logging objects" << endl;
     for (int i = 0; i < strawHatCount; i++) {
         cout << strawHats[i]->str() << endl;
     }
@@ -1603,4 +1716,15 @@ void EniesLobbyBattle::tempLog() {
     for (int i = 0; i < buildingCount; i++) {
         cout << buildings[i]->str() << endl;
     }
+    cout << "Logging objects completed" << endl;
+}
+
+void EniesLobbyBattle::tempLogTurnNode() {
+    cout << "Logging turn order" << endl;
+    TurnNode* temp = turnOrder;
+    while (temp != nullptr) {
+        cout << temp->data->str() << endl;
+        temp = temp->next;
+    }
+    cout << "Logging turn order completed" << endl;
 }
