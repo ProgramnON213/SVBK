@@ -251,7 +251,7 @@ bool StrawHat::isStrawHat() const {
 string StrawHat::str() const {
     // TODO: implement
     stringstream res;
-    res << "StrawHat [" << this->strCharacter() << ", bounty=" << this->bounty << "]";
+    res << "StrawHat[" << this->strCharacter() << ", bounty=" << this->bounty << "]";
     return res.str();
 }
 
@@ -866,7 +866,7 @@ bool CP9Agent::isCP9() const {
 string CP9Agent::str() const {
     // TODO: implement
     stringstream res;
-    res << "CP9 [" << this->strCharacter() << ", doriki=" << this->doriki << "]";
+    res << "CP9[" << this->strCharacter() << ", doriki=" << this->doriki << "]";
     return res.str();
 }
 
@@ -1185,7 +1185,7 @@ void Building::setHPandState(int hp) {
 
 string Building::str() const {
     stringstream res;
-    res << "Building [name=" << this->name << ", hp=" << this->hp << ", maxHP=" << this->maxHP << ", destroyed=" << boolalpha << this->destroyed << "]";
+    res << "Building[name=" << this->name << ", hp=" << this->hp << ", maxHP=" << this->maxHP << ", destroyed=" << boolalpha << this->destroyed << "]";
     return res.str();
 }
 
@@ -1328,7 +1328,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             int morale, alarmLevel, rescueProgress, escapeProgress, busterCallTimer, maxTurns;
             stream >> morale >> alarmLevel >> rescueProgress >> escapeProgress >> busterCallTimer >> maxTurns;
             this->maxTurns = maxTurns;
-            BattleContext context = BattleContext(morale, alarmLevel, rescueProgress, escapeProgress, busterCallTimer);
+            context = BattleContext(morale, alarmLevel, rescueProgress, escapeProgress, busterCallTimer);
         }
         
         else if (lineObjectType == "STRAW_HAT") {
@@ -1499,10 +1499,11 @@ void EniesLobbyBattle::buildTurnOrder() {
 void EniesLobbyBattle::deleteTurnOrder() {
     TurnNode* current = turnOrder;
     while (current != nullptr) {
-        TurnNode* next = turnOrder->next;
+        TurnNode* next = current->next;
         delete current;
         current = next;
     }
+    turnOrder = nullptr;
 }
 
 void EniesLobbyBattle::moveNodeToEnd() {
@@ -1525,9 +1526,9 @@ void EniesLobbyBattle::runBattle() {
     while (!battleEnded) {
         if (turnOrder->data->isAlive()) {
             Character* character = turnOrder->data;
-            processTurn(character); // Bug here
+            processTurn(character);
         }
-        
+  
         moveNodeToEnd();
 
         processBuildings();
@@ -1536,8 +1537,6 @@ void EniesLobbyBattle::runBattle() {
 
         checkEndCondition();
 
-        tempLogTurnNode();
-        tempLogObjects();
     }
 }
 
@@ -1674,7 +1673,7 @@ Character* EniesLobbyBattle::firstStrawHatAlive() const {
 
 Character* EniesLobbyBattle::firstCP9AgentAlive() const {
     int i = 0;
-    while (cp9Agents[i]->isAlive() && i < cp9Count) {
+    while (!cp9Agents[i]->isAlive() && i < cp9Count) {
         i++;
     }
     if (i >= cp9Count) {return nullptr;}
@@ -1743,3 +1742,16 @@ void EniesLobbyBattle::tempLogTurnNode() {
     }
     cout << "Logging turn order completed" << endl;
 }
+
+void EniesLobbyBattle::tempLogCharacterAndTarget(Character* character, Character* targetCharacter, 
+        Building* targetBuilidng) {
+            cout << "Logging character and target" << endl;
+            cout << character->str() << endl;
+            if (targetCharacter != nullptr) {
+                cout << targetCharacter->str() << endl;
+            }
+            else if (targetBuilidng != nullptr) {
+                cout << targetBuilidng->str() << endl;
+            }
+            cout << "Logging character and target completed" << endl;
+        }

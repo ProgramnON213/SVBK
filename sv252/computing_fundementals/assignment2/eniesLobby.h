@@ -470,6 +470,8 @@ public:
     void tempLog();
     void tempLogObjects();
     void tempLogTurnNode();
+    void tempLogCharacterAndTarget(Character* character, Character* targetCharacter, 
+        Building* targetBuilidng);
 };
 
 
