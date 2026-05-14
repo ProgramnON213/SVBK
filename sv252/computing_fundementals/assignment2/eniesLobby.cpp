@@ -38,10 +38,6 @@ void BattleContext::nextTurn() {
     turnCount++;
 }
 
-void BattleContext::defaultMoraleIncrease() {
-    setMorale(this->morale + 5);
-}
-
 void BattleContext::setMorale(int morale) {
     this->morale = setByCondition(morale);
 };
@@ -193,6 +189,14 @@ int Character::getEnergyRequirement() const {
     return energyRequirement;
 }
 
+int Character::getKillInTurn() const {
+    return killInTurn;
+}
+
+int Character::getDefaultMoraleChange() const {
+    return defaultMoraleChange;
+}
+
 int Character::getDef() const {
     return def;
 }
@@ -265,6 +269,7 @@ Luffy::Luffy(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) { 
     // TODO: implement
     energyRequirement = 20;
+    defaultMoraleChange = false;
 }
 
 int Luffy::calculateAttackDamge() const {
@@ -308,7 +313,7 @@ int Luffy::attack(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
 
     if (!target->isAlive()) {
-        //context.setMorale(context.morale + 5);
+        context.setMorale(context.morale + 5);
     }
 
     int hp2 = target->getHP();
@@ -364,7 +369,7 @@ void Luffy::endTurn(BattleContext& context) {
         setEnergy(energy + 5);
     }
     if (hp <= ceil(0.3*maxHp)) {
-        //context.setMorale(context.morale + 3);
+        context.setMorale(context.morale + 3);
     }
 }
 
@@ -375,6 +380,7 @@ Zoro::Zoro(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 15;
+    defaultMoraleChange = false;
 }
 
 int Zoro::attack(Character* target, BattleContext& context) {
@@ -417,7 +423,7 @@ int Zoro::specialSkill(Character* target, BattleContext& context) {
 
     if (!(target->isAlive())) {
         setEnergy(energy + 8);
-        //context.setMorale(context.morale + 4);
+        context.setMorale(context.morale + 4);
     }
 
     int hp2 = target->getHP();
@@ -441,7 +447,7 @@ int Zoro::specialSkill(Building* target, BattleContext& context) {
 void Zoro::endTurn(BattleContext& context) {
     // TODO: implement
     if (killInTurn) {
-        //context.setMorale(context.morale + 6);
+        context.setMorale(context.morale + 6);
         atk = ceil(1.05 * atk);
     }
 }
@@ -453,6 +459,7 @@ Sanji::Sanji(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 18;
+    defaultMoraleChange = false;
 }
 
 int Sanji::attack(Character* target, BattleContext& context) {
@@ -512,7 +519,7 @@ int Sanji::specialSkill(Building* target, BattleContext& context) {
 void Sanji::endTurn(BattleContext& context) {
     // TODO: implement
     if (killInTurn) {
-        //context.setMorale(context.morale + 8);
+        context.setMorale(context.morale + 8);
         atk = ceil(1.1 * atk);
     }
 }
@@ -524,6 +531,7 @@ Nami::Nami(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 20;
+    defaultMoraleChange = true;
 }
 
 int Nami::attack(Character* target, BattleContext& context) {
@@ -589,9 +597,6 @@ void Nami::endTurn(BattleContext& context) {
     if (killInTurn) {
         setEnergy(energy + 6);
     }
-    if (killInTurn) {
-        //context.setMorale(context.morale + 5);
-    }
 }
 
 /*
@@ -601,6 +606,7 @@ Chopper::Chopper(string name, int hp, int atk, int def,
                  int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 15;
+    defaultMoraleChange = false;
 }
 
 int Chopper::attack(Character* target, BattleContext& context) {
@@ -631,7 +637,7 @@ int Chopper::specialSkill(Character* target, BattleContext& context) {
 
     target->setHPandState(target->getHP() + heal);
     if (target->getName() == "LUFFY") {
-        //context.setMorale(context.morale + 5);
+        context.setMorale(context.morale + 5);
     }
 
     return 0;
@@ -639,9 +645,7 @@ int Chopper::specialSkill(Character* target, BattleContext& context) {
 
 void Chopper::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killInTurn) {
-        //context.setMorale(context.morale + 5);
-    }
+    ;
 }
 
 /*
@@ -651,6 +655,7 @@ Usopp::Usopp(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 16;
+    defaultMoraleChange = false;
 }
 
 int Usopp::attack(Character* target, BattleContext& context) {
@@ -707,7 +712,7 @@ int Usopp::specialSkill(Building* target, BattleContext& context) {
 
 void Usopp::endTurn(BattleContext& context) {
     // TODO: implement
-    //context.setMorale(context.morale + 10);
+    context.setMorale(context.morale + 10);
 }
 
 /*
@@ -716,6 +721,7 @@ void Usopp::endTurn(BattleContext& context) {
 Franky::Franky(string name, int hp, int atk, int def,
                int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
+    defaultMoraleChange = true;
 }
 
 int Franky::takeTurn(Character* target, BattleContext& context) {
@@ -837,9 +843,6 @@ void Franky::endTurn(BattleContext& context) {
     if (hp < ceil(0.3 * maxHp)) {
         atk = ceil(1.1 * atk);
     }
-    if (killInTurn) {
-        //context.setMorale(context.morale + 5);
-    }
 }
 
 /*
@@ -889,6 +892,7 @@ Lucci::Lucci(string name, int hp, int atk, int def,
              int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 25;
+    defaultMoraleChange = false;
 }
 
 int Lucci::attack(Character* target, BattleContext& context) {
@@ -916,7 +920,7 @@ int Lucci::specialSkill(Character* target, BattleContext& context) {
     target->setDef(tempDef);
 
     if (!target->isAlive()) {
-        //context.setMorale(context.morale - 10);
+        context.setMorale(context.morale - 10);
     }
 
     int hp2 = target->getHP();
@@ -937,6 +941,7 @@ Kaku::Kaku(string name, int hp, int atk, int def,
            int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 20;
+    defaultMoraleChange = true;
 }
 
 int Kaku::specialSkill(Character* target, BattleContext& context) {
@@ -972,6 +977,7 @@ Jabra::Jabra(string name, int hp, int atk, int def,
              int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 18;
+    defaultMoraleChange = false;
 }
 
 int Jabra::specialSkill(Character* target, BattleContext& context) {
@@ -985,7 +991,7 @@ int Jabra::specialSkill(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
 
     if (!target->isAlive()) {
-        //context.setMorale(context.morale - 5);
+        context.setMorale(context.morale - 5);
     }
 
     int hp2 = target->getHP();
@@ -1004,6 +1010,7 @@ Blueno::Blueno(string name, int hp, int atk, int def,
                int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement 
     energyRequirement = 15;
+    defaultMoraleChange = true;
 }
 
 int Blueno::specialSkill(Character* target, BattleContext& context) {
@@ -1035,6 +1042,7 @@ Kalifa::Kalifa(string name, int hp, int atk, int def,
                int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 18;
+    defaultMoraleChange = false;
 }
 
 int Kalifa::specialSkill(Character* target, BattleContext& context) {
@@ -1046,10 +1054,10 @@ int Kalifa::specialSkill(Character* target, BattleContext& context) {
     target->setSpeed(target->getSpeed() - 6);
 
     if (target->getName() == "NAMI") {
-        //context.setMorale(context.morale - 12);
+        context.setMorale(context.morale - 12);
     }
     else {
-        //context.setMorale(context.morale - 8);
+        context.setMorale(context.morale - 8);
     }
 
     int hp2 = target->getHP();
@@ -1068,6 +1076,7 @@ Kumadori::Kumadori(string name, int hp, int atk, int def,
                    int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 16;
+    defaultMoraleChange = true;
 }
 
 int Kumadori::specialSkill(Character* target, BattleContext& context) {
@@ -1096,6 +1105,7 @@ Fukurou::Fukurou(string name, int hp, int atk, int def,
                  int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 14;
+    defaultMoraleChange = false;
 }
 
 int Fukurou::specialSkill(Character* target, BattleContext& context) {
@@ -1109,9 +1119,9 @@ int Fukurou::specialSkill(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
 
     if (!target->isAlive()) {
-        //context.setMorale(context.morale - 6);
+        context.setMorale(context.morale - 6);
     }
-    
+
     int hp2 = target->getHP();
     return hp1 - hp2;
 }
@@ -1193,7 +1203,7 @@ void MainGate::onDestroyed(BattleContext& context) {
     // TODO: implement
     context.mainGateDestroyed = true;
     context.setRescueProgress(context.rescueProgress + 20);
-    //context.setMorale(context.morale + 5);
+    context.setMorale(context.morale + 5);
 }
 
 /*
@@ -1223,7 +1233,7 @@ void TowerOfJustice::applyEffect(BattleContext& context) {
     }
     if (context.rescueProgress >= 100) {
         context.robinRescued = true;
-        //context.setMorale(context.morale + 10);
+        context.setMorale(context.morale + 10);
     }
 }
 
@@ -1591,6 +1601,11 @@ void EniesLobbyBattle::processTurn(Character* character) {
         if (targetBuilding->isDestroyed()) {
             targetBuilding->onDestroyed(context);
         }
+    }
+
+    if (character->getKillInTurn() && character->getDefaultMoraleChange()) {
+        if (character->isStrawHat()) {context.setMorale(context.morale + 5);}
+        else if (character->isCP9()) {context.setMorale(context.morale - 5);}
     }
 
     character->endTurn(context);

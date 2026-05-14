@@ -28,6 +28,7 @@ protected:
     int energyRequirement;
     bool alive;
     bool killInTurn;
+    bool defaultMoraleChange;
 
 public:
     Character();
@@ -56,6 +57,8 @@ public:
     int getDef() const;
     int getSpeed() const;
     int getEnergyRequirement() const;
+    int getKillInTurn() const;
+    int getDefaultMoraleChange() const;
 
     void setName(string name);
     void setHPandState(int hp);
@@ -320,7 +323,6 @@ public:
     BattleContext(int morale, int alarmLevel, int rescueProgress, 
                 int escapeProgress, int busterCallTimer);
     void nextTurn();
-    void defaultMoraleIncrease();
     void setMorale(int morale);
     void setAlarmLevel(int alarmLevel);
     void setRescueProgress(int rescueProgress);
