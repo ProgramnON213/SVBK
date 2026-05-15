@@ -1,6 +1,8 @@
 #include "eniesLobby.h"
-// REMINDER: Add the morale system back
-// REMINDER: attack and specialSkill return value should be actual damage
+// REMINDER: Building attack and specialSkill return value is 0, but when a character specifies a builing, return the correct value
+// REMINDER: Character attack and specialSkill return value should be real damage (larger than current HP)
+// REMINDER: special skill needs to deduct energy in the method
+// REMINDER: Chopper target choosing will be changed
 /*
  * BattleContext
  */
@@ -778,7 +780,7 @@ int Franky::attack(Building* target, BattleContext& context) {
     return hp1 - hp2;
 }
 
-// REMINDER: May need to implement this
+// REMINDER: Need to implement this
 int Franky::specialSkill(Character* target, BattleContext& context) {
     return 0;
 }
