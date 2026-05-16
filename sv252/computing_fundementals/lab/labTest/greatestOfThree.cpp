@@ -19,39 +19,32 @@ bool isLengthOver(const LList& list, int length = 2) {
     return l > length;
 }
 
-int sum(int n[], int l = 3) {
-    int sum = 0;
-    for (int i = 0; i < l; i++) {sum += n[i];}
-    return sum;
-}
-
 void greatestOfThree(const LList& list, int& first, int& second, int& third) {
     if (!isLengthOver(list)) {
         first = -1; second = -1; third = -1;
         return;
     }
 
-    int temp[3];
+    int left; int mid; int right;
     Node* cur = list.head;
-    for (int i = 0; i < 3; i++) {
-        temp[i] = cur->data;
-        cur = cur->next;
-    }
+    left = cur->data;   cur = cur->next;
+    mid = cur->data;    cur = cur->next;
+    right = cur->data;  cur = cur->next;
 
-    int tempSum = sum(temp);
-    first = temp[0];
-    second = temp[1];
-    third = temp[2];
+    int tempSum = left + mid + right;
+    first = left;
+    second = mid;
+    third = right;
 
     while (cur != nullptr) {
-        temp[0] = temp[1];
-        temp[1] = temp[2];
-        temp[2] = cur->data;
-        if (sum(temp) >= tempSum) {
-            tempSum = sum(temp);
-            first = temp[0];
-            second = temp[1];
-            third = temp[2];
+        left = mid;
+        mid = right;
+        right = cur->data;
+        if (left + mid + right >= tempSum) {
+            tempSum = left + mid + right;
+            first = left;
+            second = mid;
+            third = right;
         }
         cur = cur->next;
     }
