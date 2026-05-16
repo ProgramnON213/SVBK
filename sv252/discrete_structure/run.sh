@@ -1,0 +1,1 @@
+g++ -o main main.cpp PathNode.cpp -I . -std=c++11
