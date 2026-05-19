@@ -1,4 +1,5 @@
-#include <main.h>
+// PathNode.h
+#include "main.h"
 
 struct PathNode {
     string name;

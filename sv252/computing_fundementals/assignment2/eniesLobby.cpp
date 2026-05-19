@@ -1,9 +1,4 @@
 #include "eniesLobby.h"
-// REMINDER: attack and specialSkill on Character and Building return value should be real damage (larger than current HP)
-// REMINDER: special skill needs to deduct energy in the method
-// REMINDER: Chopper target choosing will be changed
-// REMINDER: Chopper can NOT revive allies (can only affect alive character)
-// REMINDER: Luffy can die after using skill (13 HP specifically)
 // REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
 // REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
 /*
@@ -776,7 +771,9 @@ int Franky::specialSkill(Character* target, BattleContext& context) {
     else if (energy >= 20) {
         return specialSkill1(target, context);
     }
+    return 0;
 }
+
 int Franky::specialSkill(Building* target, BattleContext& context) {
     if (energy >= 30) {
         return specialSkill2(target, context);
@@ -784,6 +781,7 @@ int Franky::specialSkill(Building* target, BattleContext& context) {
     else if (energy >= 20) {
         return specialSkill1(target, context);
     }
+    return 0;
 }
 
 int Franky::specialSkill1(Character* target, BattleContext& context) {
@@ -1726,44 +1724,3 @@ int calculateDamage(int damage, int def) {
     if (res < 0) {res = 0;}
     return res;
 }
-
-void EniesLobbyBattle::tempLog() {
-    context.logContext();
-}
-
-void EniesLobbyBattle::tempLogObjects() {
-    cout << "Logging objects" << endl;
-    for (int i = 0; i < strawHatCount; i++) {
-        cout << strawHats[i]->str() << endl;
-    }
-    for (int i = 0; i < cp9Count; i++) {
-        cout << cp9Agents[i]->str() << endl;
-    }
-    for (int i = 0; i < buildingCount; i++) {
-        cout << buildings[i]->str() << endl;
-    }
-    cout << "Logging objects completed" << endl;
-}
-
-void EniesLobbyBattle::tempLogTurnNode() {
-    cout << "Logging turn order" << endl;
-    TurnNode* temp = turnOrder;
-    while (temp != nullptr) {
-        cout << temp->data->str() << endl;
-        temp = temp->next;
-    }
-    cout << "Logging turn order completed" << endl;
-}
-
-void EniesLobbyBattle::tempLogCharacterAndTarget(Character* character, Character* targetCharacter, 
-        Building* targetBuilidng) {
-            cout << "Logging character and target" << endl;
-            cout << character->str() << endl;
-            if (targetCharacter != nullptr) {
-                cout << targetCharacter->str() << endl;
-            }
-            else if (targetBuilidng != nullptr) {
-                cout << targetBuilidng->str() << endl;
-            }
-            cout << "Logging character and target completed" << endl;
-        }

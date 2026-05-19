@@ -1,4 +1,4 @@
-#include <PathNode.h>
+#include "PathNode.h"
 
 PathNode::PathNode() {
     this->name = "default";
