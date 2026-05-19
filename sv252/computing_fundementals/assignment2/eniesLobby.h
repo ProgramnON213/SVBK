@@ -27,8 +27,9 @@ protected:
     int energy;
     int energyRequirement;
     bool alive;
-    bool killInTurn;
-    bool defaultMoraleChange;
+    bool killCharacterInTurn;
+    bool destroyBuildingInTurn;
+    bool hasMoraleInDescripton;
 
 public:
     Character();
@@ -57,15 +58,17 @@ public:
     int getDef() const;
     int getSpeed() const;
     int getEnergyRequirement() const;
-    int getKillInTurn() const;
-    int getDefaultMoraleChange() const;
+    bool getkillCharacterInTurn() const;
+    bool getDestroyBuildingInTurn() const;
+    int gethasMoraleInDescripton() const;
 
     void setName(string name);
     void setHPandState(int hp);
     void setEnergy(int energy);
     void setDef(int def);
     void setSpeed(int speed);
-    void setKillInTurn(bool value);
+    void setkillCharacterInTurn(bool value);
+    void setDestroyBuildingInTurn(bool value);
 
     virtual bool isStrawHat() const;
     virtual bool isCP9() const;
@@ -463,7 +466,7 @@ public:
     string getResult() const;
     Character* firstStrawHatAlive() const;
     Character* firstCP9AgentAlive() const;
-    Character* lowestHPCharacterInStrawHat() const;
+    Character* lowestHPAliveStrawHat() const;
 
     Building* findBuildingWithName(string name);
 
@@ -476,5 +479,6 @@ public:
 
 
 int setByCondition(int n, int min=0, int max=100);
+int calculateDamage(int damage, int def);
 
 #endif

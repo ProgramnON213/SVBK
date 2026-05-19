@@ -1,8 +1,11 @@
 #include "eniesLobby.h"
-// REMINDER: Building attack and specialSkill return value is 0, but when a character specifies a builing, return the correct value
-// REMINDER: Character attack and specialSkill return value should be real damage (larger than current HP)
+// REMINDER: attack and specialSkill on Character and Building return value should be real damage (larger than current HP)
 // REMINDER: special skill needs to deduct energy in the method
 // REMINDER: Chopper target choosing will be changed
+// REMINDER: Chopper can NOT revive allies (can only affect alive character)
+// REMINDER: Luffy can die after using skill (13 HP specifically)
+// REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
+// REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
 /*
  * BattleContext
  */
@@ -87,7 +90,8 @@ Character::Character() {
     speed = 0;
     energy = 0;
     alive = false;
-    killInTurn = false;
+    killCharacterInTurn = false;
+    destroyBuildingInTurn = false;
 }
 
 Character::Character(string name, int hp, int atk, int def, int speed, int energy) {
@@ -99,7 +103,8 @@ Character::Character(string name, int hp, int atk, int def, int speed, int energ
     this->def = def;
     this->speed = speed;
     setEnergy(energy);
-    killInTurn = false;
+    killCharacterInTurn = false;
+    destroyBuildingInTurn = false;
 }
 
 Character::~Character() {
@@ -108,7 +113,6 @@ Character::~Character() {
 
 int Character::takeTurn(Character* target, BattleContext& context) {
     if (energy >= energyRequirement) {
-        energy -= energyRequirement;
         return specialSkill(target, context);
     }
     else {
@@ -118,7 +122,6 @@ int Character::takeTurn(Character* target, BattleContext& context) {
 
 int Character::takeTurn(Building* target, BattleContext& context) {
     if (energy >= energyRequirement) {
-        energy -= energyRequirement;
         return specialSkill(target, context);
     }
     else {
@@ -148,13 +151,11 @@ void Character::receiveDamage(int damage) {
 
 bool Character::isAlive() const {
     // TODO: implement
-    bool alive = this->alive;
     return alive;
 }
 
 string Character::getName() const {
     // TODO: implement
-    string name = this->name;
     return name;
 }
 
@@ -164,7 +165,6 @@ void Character::setName(string name) {
 
 int Character::getHP() const {
     // TODO: implement
-    int hp = this->hp;
     return hp;
 }
 
@@ -174,12 +174,11 @@ int Character::getMaxHP() const {
 
 void Character::setHPandState(int hp) {
     this->hp = setByCondition(hp, 0, maxHp);
-    this->alive = !(this->hp == 0);
+    this->alive = (this->hp > 0);
 }
 
 int Character::getEnergy() const {
     // TODO: implement
-    int energy = this->energy;
     return energy;
 }
 
@@ -191,12 +190,16 @@ int Character::getEnergyRequirement() const {
     return energyRequirement;
 }
 
-int Character::getKillInTurn() const {
-    return killInTurn;
+bool Character::getkillCharacterInTurn() const {
+    return killCharacterInTurn;
 }
 
-int Character::getDefaultMoraleChange() const {
-    return defaultMoraleChange;
+bool Character::getDestroyBuildingInTurn() const {
+    return destroyBuildingInTurn;
+}
+
+int Character::gethasMoraleInDescripton() const {
+    return hasMoraleInDescripton;
 }
 
 int Character::getDef() const {
@@ -214,8 +217,12 @@ void Character::setSpeed(int speed) {
     this->speed = speed;
 }
 
-void Character::setKillInTurn(bool value) {
-    this->killInTurn = value;
+void Character::setkillCharacterInTurn(bool value) {
+    this->killCharacterInTurn = value;
+}
+
+void Character::setDestroyBuildingInTurn(bool value) {
+    this->destroyBuildingInTurn = value;
 }
 
 bool Character::isStrawHat() const {
@@ -271,7 +278,7 @@ Luffy::Luffy(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) { 
     // TODO: implement
     energyRequirement = 20;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Luffy::calculateAttackDamge() const {
@@ -289,7 +296,6 @@ int Luffy::calculateAttackDamge() const {
 
 int Luffy::takeTurn(Character* target, BattleContext& context) {
     if (energy >= energyRequirement && hp >= ceil(0.15 * maxHp)) {
-        energy -= energyRequirement;
         return specialSkill(target, context);
     }
     else {
@@ -299,7 +305,6 @@ int Luffy::takeTurn(Character* target, BattleContext& context) {
 
 int Luffy::takeTurn(Building* target, BattleContext& context) {
     if (energy >= energyRequirement && hp >= ceil(0.15 * maxHp)) {
-        energy -= energyRequirement;
         return specialSkill(target, context);
     }
     else {
@@ -309,65 +314,66 @@ int Luffy::takeTurn(Building* target, BattleContext& context) {
 
 int Luffy::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = calculateAttackDamge();
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
     if (!target->isAlive()) {
         context.setMorale(context.morale + 5);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Luffy::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = calculateAttackDamge();
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    if (!target->isDestroyed()) {
+        context.setMorale(context.morale + 5);
+    }
+
+    return damage;
 }
 
 int Luffy::calculateSkillDamage(BattleContext& context) {
-    int damage = 2 * atk + 15;
-    setEnergy(energy - 20);
+    int damage = 2 * atk;
+    atk += 15;
     speed += 15;
     context.setAlarmLevel(context.alarmLevel + 10);
     int lostHp = ceil(0.08*maxHp);
     setHPandState(hp - lostHp);
+
     return damage;
 }
 
 int Luffy::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = calculateSkillDamage(context);
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Luffy::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = calculateSkillDamage(context);
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 void Luffy::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killInTurn) {
+    if (killCharacterInTurn) {
         setEnergy(energy + 5);
     }
     if (hp <= ceil(0.3*maxHp)) {
@@ -382,73 +388,69 @@ Zoro::Zoro(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 15;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Zoro::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk + ceil(0.2 * def);
     if (target->getHP() < ceil(0.4 * target->getMaxHP())) {
         damage = ceil(1.15 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Zoro::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
-    int damage = atk + ceil(0.2 * def);
-    if (target->getHP() < ceil(0.4 * target->getMaxHP())) {
-        damage = ceil(1.15 * damage);
-    }
+    int damage = atk + ceil(0.2 * def); 
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 int Zoro::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = ceil(2.2 * atk);
-    if (target->getHP() < ceil(0.5) * target->getMaxHP()) {
+    if (target->getHP() < ceil(0.5 * target->getMaxHP())) {
         damage = ceil(1.5 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
     if (!(target->isAlive())) {
         setEnergy(energy + 8);
         context.setMorale(context.morale + 4);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Zoro::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = ceil(2.2 * atk);
-    if (target->getHP() < ceil(0.5) * target->getMaxHP()) {
-        damage = ceil(1.5 * damage);
-    }
 
     target->receiveDamage(damage);
-    
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    if (!(target->isDestroyed())) {
+        setEnergy(energy + 8);
+        context.setMorale(context.morale + 4);
+    }
+
+    return damage;
 }
 
 void Zoro::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killInTurn) {
+    if (killCharacterInTurn || destroyBuildingInTurn) {
         context.setMorale(context.morale + 6);
         atk = ceil(1.05 * atk);
     }
@@ -461,66 +463,64 @@ Sanji::Sanji(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 18;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Sanji::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk + ceil(0.5*speed);
     if (target->getDef() < def) {
         damage = ceil(damage * 1.1);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Sanji::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk + ceil(0.5*speed);
 
     target->receiveDamage(damage);
-
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    
+    return damage;
 }
 
 int Sanji::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = ceil(2.1 * atk);
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    if (target->getName() == "JABRA") {
+    if (target->getName() == "Jabra") {
         target->setDef(target->getDef() - 12);
     }
     else {
         target->setDef(target->getDef() - 8);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Sanji::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = ceil(2.1 * atk);
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 void Sanji::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killInTurn) {
+    if (killCharacterInTurn || destroyBuildingInTurn) {
         context.setMorale(context.morale + 8);
         atk = ceil(1.1 * atk);
     }
@@ -533,32 +533,29 @@ Nami::Nami(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 20;
-    defaultMoraleChange = true;
+    hasMoraleInDescripton = false;
 }
 
 int Nami::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk;
 
     int tempDef = target->getDef();
     target->setDef(ceil(0.7 * target->getDef()));
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
     target->setDef(tempDef);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Nami::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = ceil(0.5*atk);
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 void Nami::skillEffect(BattleContext& context) const {
@@ -568,21 +565,23 @@ void Nami::skillEffect(BattleContext& context) const {
 
 int Nami::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = atk + 40;
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
     target->setSpeed(target->getSpeed() - 10);
 
     skillEffect(context);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Nami::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = (atk + 40);
     damage = ceil(1.5 * damage);
 
@@ -590,13 +589,12 @@ int Nami::specialSkill(Building* target, BattleContext& context) {
 
     skillEffect(context);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 void Nami::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killInTurn) {
+    if (killCharacterInTurn || destroyBuildingInTurn) {
         setEnergy(energy + 6);
     }
 }
@@ -608,37 +606,36 @@ Chopper::Chopper(string name, int hp, int atk, int def,
                  int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 15;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Chopper::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk;
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Chopper::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk;
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 int Chopper::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
+    setEnergy(energy - energyRequirement);
+
     int heal = 35 + ceil(0.5 * atk);
 
     target->setHPandState(target->getHP() + heal);
-    if (target->getName() == "LUFFY") {
+    if (target->getName() == "Luffy") {
         context.setMorale(context.morale + 5);
     }
 
@@ -657,59 +654,57 @@ Usopp::Usopp(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
     energyRequirement = 16;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Usopp::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk;
     if (target->getSpeed() < 50) {
         damage = ceil(1.2 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Usopp::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = ceil(0.5 * atk);
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 int Usopp::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = ceil(0.8 * atk);
 
     target->receiveDamage(damage);
+    int realDamge = calculateDamage(damage, target->getDef());
     target->setSpeed(target->getSpeed() - 12);
 
     context.setEscapeProgress(context.escapeProgress + 8);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamge;
 }
 
 int Usopp::specialSkill(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+
     int damage = ceil(0.8 * atk);
 
     target->receiveDamage(damage);
 
     context.setEscapeProgress(context.escapeProgress + 8);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 void Usopp::endTurn(BattleContext& context) {
@@ -723,16 +718,14 @@ void Usopp::endTurn(BattleContext& context) {
 Franky::Franky(string name, int hp, int atk, int def,
                int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
-    defaultMoraleChange = true;
+    hasMoraleInDescripton = false;
 }
 
 int Franky::takeTurn(Character* target, BattleContext& context) {
     if (energy >= 30) {
-        energy -= 30;
         return specialSkill2(target, context);
     }
     else if (energy >= 20) {
-        energy -= 20;
         return specialSkill1(target, context);
     }
     else {
@@ -742,11 +735,9 @@ int Franky::takeTurn(Character* target, BattleContext& context) {
 
 int Franky::takeTurn(Building* target, BattleContext& context) {
     if (energy >= 30) {
-        energy -= 30;
         return specialSkill2(target, context);
     }
     else if (energy >= 20) {
-        energy -= 20;
         return specialSkill1(target, context);
     }
     else {
@@ -757,84 +748,86 @@ int Franky::takeTurn(Building* target, BattleContext& context) {
 
 int Franky::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = ceil(atk + 0.3*def);
     if (target->isCP9()) {
         damage = ceil(1.1 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Franky::attack(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = ceil(atk + 0.3*def);
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 // REMINDER: Need to implement this
 int Franky::specialSkill(Character* target, BattleContext& context) {
-    return 0;
+    if (energy >= 30) {
+        return specialSkill2(target, context);
+    }
+    else if (energy >= 20) {
+        return specialSkill1(target, context);
+    }
 }
 int Franky::specialSkill(Building* target, BattleContext& context) {
-    return 0;
+    if (energy >= 30) {
+        return specialSkill2(target, context);
+    }
+    else if (energy >= 20) {
+        return specialSkill1(target, context);
+    }
 }
 
 int Franky::specialSkill1(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - 20);
     int damage = ceil(1.8 * atk);
-    if (target->getName() == "LUCCI") {
+    if (target->getName() == "Lucci") {
         damage = ceil(1.2 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
     target->setSpeed(target->getSpeed() - 8);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Franky::specialSkill1(Building* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - 20);
     int damage = ceil(1.8 * atk);
-    if (target->getName() == "LUCCI") {
-        damage = ceil(1.2 * damage);
-    }
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 int Franky::specialSkill2(Character* target, BattleContext& context) {
-    int hp1 = target->getHP();
+    setEnergy(energy - 30);
     int damage = ceil(1.2 * atk);
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Franky::specialSkill2(Building* target, BattleContext& context) {
-    int hp1 = target->getHP();
+    setEnergy(energy - 30);
     int damage = target->getHP();
 
     target->receiveDamage(damage);
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return damage;
 }
 
 void Franky::endTurn(BattleContext& context) {
@@ -874,13 +867,12 @@ string CP9Agent::str() const {
 
 int CP9Agent::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk;
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int CP9Agent::specialSkill(Character* target, BattleContext& context) {
@@ -894,39 +886,38 @@ Lucci::Lucci(string name, int hp, int atk, int def,
              int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 25;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Lucci::attack(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
     int damage = atk + ceil(0.05 * doriki);
-    if (target->getHP() < target->getMaxHP()) {
+    if (target->getHP() < ceil(0.5 * target->getMaxHP())) {
         damage = ceil(1.2 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 int Lucci::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = ceil(2.8 * atk);
 
     int tempDef = target->getDef();
     target->setDef(tempDef - ceil(0.5*tempDef));
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
     target->setDef(tempDef);
 
     if (!target->isAlive()) {
         context.setMorale(context.morale - 10);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Lucci::endTurn(BattleContext& context) {
@@ -943,28 +934,31 @@ Kaku::Kaku(string name, int hp, int atk, int def,
            int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 20;
-    defaultMoraleChange = true;
+    hasMoraleInDescripton = false;
 }
 
 int Kaku::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
+    int realDamage = 0;
 
     int damage1 = ceil(1.2 * atk);
     target->receiveDamage(damage1);
+    realDamage += calculateDamage(damage1, target->getDef());
 
     if (target->isAlive()) {
         int damage2 = atk;
         target->receiveDamage(damage2);
+        realDamage += calculateDamage(damage2, target->getDef());
     }
 
     if (target->isAlive()) {
         int damage3 = ceil(0.8 * atk);
         target->receiveDamage(damage3);
+        realDamage += calculateDamage(damage3, target->getDef());
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Kaku::endTurn(BattleContext& context) {
@@ -979,25 +973,25 @@ Jabra::Jabra(string name, int hp, int atk, int def,
              int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 18;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Jabra::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = ceil(1.5 * atk);
     if (hp < ceil(0.3 * maxHp)) {
         damage = ceil(1.25 * damage);
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
     if (!target->isAlive()) {
         context.setMorale(context.morale - 5);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Jabra::endTurn(BattleContext& context) {
@@ -1012,12 +1006,12 @@ Blueno::Blueno(string name, int hp, int atk, int def,
                int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement 
     energyRequirement = 15;
-    defaultMoraleChange = true;
+    hasMoraleInDescripton = false;
 }
 
 int Blueno::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = ceil(1.3 * atk);
     if (hp > ceil(0.5 * maxHp)) {
         damage += 20;
@@ -1027,9 +1021,9 @@ int Blueno::specialSkill(Character* target, BattleContext& context) {
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Blueno::endTurn(BattleContext& context) {
@@ -1044,26 +1038,26 @@ Kalifa::Kalifa(string name, int hp, int atk, int def,
                int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 18;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Kalifa::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = ceil(1.4 * atk);
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
     target->setSpeed(target->getSpeed() - 6);
 
-    if (target->getName() == "NAMI") {
+    if (target->getName() == "Nami") {
         context.setMorale(context.morale - 12);
     }
     else {
         context.setMorale(context.morale - 8);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Kalifa::endTurn(BattleContext& context) {
@@ -1078,21 +1072,21 @@ Kumadori::Kumadori(string name, int hp, int atk, int def,
                    int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 16;
-    defaultMoraleChange = true;
+    hasMoraleInDescripton = false;
 }
 
 int Kumadori::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = 30 + ceil(0.1 * doriki);
     if (hp < ceil(0.4 * maxHp)) {
         damage += 25;
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Kumadori::endTurn(BattleContext& context) {
@@ -1107,25 +1101,25 @@ Fukurou::Fukurou(string name, int hp, int atk, int def,
                  int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
     energyRequirement = 14;
-    defaultMoraleChange = false;
+    hasMoraleInDescripton = true;
 }
 
 int Fukurou::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
-    int hp1 = target->getHP();
+    setEnergy(energy - energyRequirement);
     int damage = ceil(1.3 * atk);
     if (target == lowestHPStrawHat) {
         damage += 20;
     }
 
     target->receiveDamage(damage);
+    int realDamage = calculateDamage(damage, target->getDef());
 
     if (!target->isAlive()) {
         context.setMorale(context.morale - 6);
     }
 
-    int hp2 = target->getHP();
-    return hp1 - hp2;
+    return realDamage;
 }
 
 void Fukurou::endTurn(BattleContext& context) {
@@ -1149,12 +1143,11 @@ Building::~Building() {
 
 void Building::receiveDamage(int damage) {
     // TODO: implement
-    setHPandState(getHP() - damage);
+    setHPandState(hp - damage);
 }
 
 bool Building::isDestroyed() const {
     // TODO: implement
-    bool destroyed = this->destroyed;
     return destroyed;
 }
 
@@ -1251,7 +1244,9 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
         context.setEscapeProgress(context.escapeProgress + 5);
     }
     if (context.escapeProgress >= 100) {
-        // Fight end with STAW_HAT_WIN
+        // Fight end with STAW_HAT_WIN, see in checkEndCondition
+        context.battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN";
     }
 }
 
@@ -1266,9 +1261,9 @@ void BusterCallShip::applyEffect(BattleContext& context) {
         context.setBusterCallTimer(context.busterCallTimer - 1);
     }
     if (context.busterCallTimer <= 0) {
-        // Fight end with BUSTER CALL
+        // Fight end with BUSTER_CALL
         context.battleEnded = true;
-        context.resultCode = "BUSTER CALL";
+        context.resultCode = "BUSTER_CALL";
     }
 }
 
@@ -1525,7 +1520,7 @@ void EniesLobbyBattle::moveNodeToEnd() {
 
 void EniesLobbyBattle::runBattle() {
     // TODO: implement
-    while (!battleEnded) {
+    while (!context.battleEnded) {
         if (turnOrder->data->isAlive()) {
             Character* character = turnOrder->data;
             processTurn(character);
@@ -1538,7 +1533,6 @@ void EniesLobbyBattle::runBattle() {
         context.nextTurn();
 
         checkEndCondition();
-
     }
 }
 
@@ -1557,8 +1551,9 @@ void EniesLobbyBattle::selectTarget(Character* character, BattleContext& context
 
 void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext& context, 
     Character*& targetCharacter, Building*& targetBuilding) {
+        // REMINDER: Chopper target priority will be changed
         if (character->getName() == "Chopper" && character->getEnergy() >= character->getEnergyRequirement()) {
-            targetCharacter = lowestHPCharacterInStrawHat();
+            targetCharacter = lowestHPAliveStrawHat();
         }
         else if (!context.mainGateDestroyed) {
             targetBuilding = findBuildingWithName("MainGate");
@@ -1574,7 +1569,7 @@ void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext&
         }
         else if (context.robinRescued) {
             targetBuilding = findBuildingWithName("BridgeOfHesitation");
-            if (targetBuilding->isDestroyed()) {
+            if (targetBuilding->isDestroyed() || targetBuilding == nullptr) {
                 targetCharacter = firstCP9AgentAlive();
                 targetBuilding = nullptr;
             }
@@ -1585,26 +1580,28 @@ void EniesLobbyBattle::processTurn(Character* character) {
     // TODO: implement
     Character* targetCharacter; Building* targetBuilding;
     selectTarget(character, context, targetCharacter, targetBuilding);
-    character->setKillInTurn(false);
+    character->setkillCharacterInTurn(false);
+    character->setDestroyBuildingInTurn(false);
     if (character->getName() == "Fukurou") {
         Fukurou* fukurouPtr = (Fukurou*) character;
-        fukurouPtr->lowestHPStrawHat = lowestHPCharacterInStrawHat();
+        fukurouPtr->lowestHPStrawHat = lowestHPAliveStrawHat();
     }
 
     if (targetCharacter != nullptr) {
         character->takeTurn(targetCharacter, context);
         if (!targetCharacter->isAlive()) {
-            character->setKillInTurn(true);
+            character->setkillCharacterInTurn(true);
         }
     }
     else if (targetBuilding != nullptr) {
         character->takeTurn(targetBuilding, context);
         if (targetBuilding->isDestroyed()) {
             targetBuilding->onDestroyed(context);
+            character->setDestroyBuildingInTurn(true);
         }
     }
 
-    if (character->getKillInTurn() && character->getDefaultMoraleChange()) {
+    if (character->getkillCharacterInTurn() && !character->gethasMoraleInDescripton()) {
         if (character->isStrawHat()) {context.setMorale(context.morale + 5);}
         else if (character->isCP9()) {context.setMorale(context.morale - 5);}
     }
@@ -1625,23 +1622,23 @@ void EniesLobbyBattle::processBuildings() {
 void EniesLobbyBattle::checkEndCondition() {
     // TODO: implement
     if (context.robinRescued && context.escapeProgress >= 100) {
-        battleEnded = true;
+        context.battleEnded = true;
         context.resultCode = "STRAW_HAT_WIN";
     }
     else if (context.busterCallTimer <= 0) {
-        battleEnded = true;
+        context.battleEnded = true;
         context.resultCode = "BUSTER_CALL";
     }
     else if (isAllStrawHatDead()) {
-        battleEnded = true;
+        context.battleEnded = true;
         context.resultCode = "CP9_WIN";
     }  
     else if (isAllCP9AgentDead()) {
-        battleEnded = true;
+        context.battleEnded = true;
         context.resultCode = "STRAW_HAT_WIN_BY_DEFEAT_CP9";
     }
     else if (context.turnCount >= maxTurns) {
-        battleEnded = true;
+        context.battleEnded = true;
         context.resultCode = "TIME_OUT";
     }
 }
@@ -1661,7 +1658,11 @@ bool EniesLobbyBattle::isAllCP9AgentDead() {
 
 string EniesLobbyBattle::getResult() const {
     // TODO: implement
-    return context.resultCode;
+    stringstream ss;
+    ss << context.resultCode << " " << context.turnCount << " " << context.morale << " " 
+    << context.alarmLevel << " " << context.rescueProgress << " " << context.escapeProgress
+    << " " << context.busterCallTimer;
+    return ss.str();
 }
 
 Character* EniesLobbyBattle::firstStrawHatAlive() const {
@@ -1682,7 +1683,8 @@ Character* EniesLobbyBattle::firstCP9AgentAlive() const {
     return cp9Agents[i];
 }
 
-Character* EniesLobbyBattle::lowestHPCharacterInStrawHat() const {
+// Find the character with the lowest HP in strawHats that is still alive
+Character* EniesLobbyBattle::lowestHPAliveStrawHat() const {
     Character* resultCharacter = nullptr;
     int minHp = firstStrawHatAlive()->getHP();
 
@@ -1707,6 +1709,7 @@ Building* EniesLobbyBattle::findBuildingWithName(string name) {
     return nullptr;
 }
 
+// Clamp stat
 int setByCondition(int n, int min, int max) {
     if (n < min) {
         return min;
@@ -1715,6 +1718,13 @@ int setByCondition(int n, int min, int max) {
         return max;
     }
     return n;
+}
+
+// Calculate damage to return in attack and specialSkill
+int calculateDamage(int damage, int def) {
+    int res = damage - def;
+    if (res < 0) {res = 0;}
+    return res;
 }
 
 void EniesLobbyBattle::tempLog() {
