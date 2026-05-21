@@ -327,7 +327,7 @@ int Luffy::attack(Building* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
-    if (!target->isDestroyed()) {
+    if (target->isDestroyed()) {
         context.setMorale(context.morale + 5);
     }
 
@@ -435,7 +435,7 @@ int Zoro::specialSkill(Building* target, BattleContext& context) {
     int damage = ceil(2.2 * atk);
 
     target->receiveDamage(damage);
-    if (!(target->isDestroyed())) {
+    if ((target->isDestroyed())) {
         setEnergy(energy + 8);
         context.setMorale(context.morale + 4);
     }
@@ -763,7 +763,6 @@ int Franky::attack(Building* target, BattleContext& context) {
     return damage;
 }
 
-// REMINDER: Need to implement this
 int Franky::specialSkill(Character* target, BattleContext& context) {
     if (energy >= 30) {
         return specialSkill2(target, context);
@@ -1605,6 +1604,7 @@ void EniesLobbyBattle::processTurn(Character* character) {
     }
 
     character->endTurn(context);
+    tempLogCharacterAndTarget(character, targetCharacter, targetBuilding);
 }
 
 void EniesLobbyBattle::processBuildings() {
@@ -1724,3 +1724,46 @@ int calculateDamage(int damage, int def) {
     if (res < 0) {res = 0;}
     return res;
 }
+
+
+
+void EniesLobbyBattle::tempLog() {
+    context.logContext();
+}
+
+void EniesLobbyBattle::tempLogObjects() {
+    cout << "Logging objects" << endl;
+    for (int i = 0; i < strawHatCount; i++) {
+        cout << strawHats[i]->str() << endl;
+    }
+    for (int i = 0; i < cp9Count; i++) {
+        cout << cp9Agents[i]->str() << endl;
+    }
+    for (int i = 0; i < buildingCount; i++) {
+        cout << buildings[i]->str() << endl;
+    }
+    cout << "Logging objects completed" << endl;
+}
+
+void EniesLobbyBattle::tempLogTurnNode() {
+    cout << "Logging turn order" << endl;
+    TurnNode* temp = turnOrder;
+    while (temp != nullptr) {
+        cout << temp->data->str() << endl;
+        temp = temp->next;
+    }
+    cout << "Logging turn order completed" << endl;
+}
+
+void EniesLobbyBattle::tempLogCharacterAndTarget(Character* character, Character* targetCharacter, 
+        Building* targetBuilidng) {
+            cout << "Logging character and target" << endl;
+            cout << character->str() << endl;
+            if (targetCharacter != nullptr) {
+                cout << targetCharacter->str() << endl;
+            }
+            else if (targetBuilidng != nullptr) {
+                cout << targetBuilidng->str() << endl;
+            }
+            cout << "Logging character and target completed" << endl;
+        }
