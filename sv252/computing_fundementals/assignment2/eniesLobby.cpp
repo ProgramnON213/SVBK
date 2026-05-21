@@ -2,6 +2,10 @@
 // REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
 // REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
 /*
+"Mục tiêu" và "Đối thủ" trong ngữ cảnh tăng/giảm morale khi hạ gục chỉ là Character thôi nhé. - Le Duy Anh
+*/
+
+/*
  * BattleContext
  */
 BattleContext::BattleContext() {
@@ -202,14 +206,14 @@ int Character::getDef() const {
 }
 
 void Character::setDef(int def) {
-    this->def = def;
+    this->def = setByCondition(def, 0, INT_MAX);
 }
 
 int Character::getSpeed() const {
     return speed;
 }
 void Character::setSpeed(int speed) {
-    this->speed = speed;
+    this->speed = setByCondition(speed, 0, INT_MAX);
 }
 
 void Character::setkillCharacterInTurn(bool value) {
@@ -327,9 +331,13 @@ int Luffy::attack(Building* target, BattleContext& context) {
 
     target->receiveDamage(damage);
 
+    /*
+    Morale only changes when the target is a character. Destroying a building does not count 
+    as defeating the target for triggering the morale increase. - Nguyen Tri Hai
     if (target->isDestroyed()) {
         context.setMorale(context.morale + 5);
     }
+    */
 
     return damage;
 }
@@ -368,7 +376,7 @@ int Luffy::specialSkill(Building* target, BattleContext& context) {
 
 void Luffy::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killCharacterInTurn) {
+    if (killCharacterInTurn) { // No destroy building here
         setEnergy(energy + 5);
     }
     if (hp <= ceil(0.3*maxHp)) {
@@ -435,10 +443,13 @@ int Zoro::specialSkill(Building* target, BattleContext& context) {
     int damage = ceil(2.2 * atk);
 
     target->receiveDamage(damage);
+
+    // "Mục tiêu" trong ngữ cảnh specialSkill của Zoro là cả Character và Building nhé bạn. - Le Duy Anh
     if ((target->isDestroyed())) {
         setEnergy(energy + 8);
         context.setMorale(context.morale + 4);
     }
+    
 
     return damage;
 }
@@ -1522,7 +1533,7 @@ void EniesLobbyBattle::runBattle() {
             Character* character = turnOrder->data;
             processTurn(character);
         }
-  
+
         moveNodeToEnd();
 
         processBuildings();

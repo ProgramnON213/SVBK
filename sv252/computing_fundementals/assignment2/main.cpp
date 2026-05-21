@@ -8,7 +8,6 @@ int main(int argc, const char * argv[]) {
         cout << "Usage: ./main <filename>" << endl;
         return -1;
     }
-    // REMINDER: Revisit test5, test8 at morale
     EniesLobbyBattle battle = EniesLobbyBattle(argv[1]);
     battle.runBattle();
     cout << battle.getResult() << endl;
