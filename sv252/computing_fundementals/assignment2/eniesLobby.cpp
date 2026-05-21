@@ -1604,7 +1604,6 @@ void EniesLobbyBattle::processTurn(Character* character) {
     }
 
     character->endTurn(context);
-    tempLogCharacterAndTarget(character, targetCharacter, targetBuilding);
 }
 
 void EniesLobbyBattle::processBuildings() {
