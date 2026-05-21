@@ -113,6 +113,9 @@ PathNode* findSocialPath(double adjMatrix[100][100], int startPerson, int goalPe
 string convertCoordToStr(int coord[2]) {
     return "(" + to_string(coord[0]) + "," + to_string(coord[1]) + ")";
 }
+string convertCoordToStr(int a, int b) {
+    return "(" + to_string(a) + "," + to_string(b) + ")";
+}
 
 /*
 – Mode 1: Manhattan distance — |x1 − x2| + |y1 − y2|
@@ -299,3 +302,101 @@ PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
     return head;
 }
 
+
+PathNode* findEvacuationRoute(int floorPlan[100][100], int m, int n, 
+    int startX, int startY, int exitX, int exitY, double weightMatrix[100][100], int mode) {
+        // Scanning the floor
+        if (mode == 2) {mode = 3;}
+        int startR = startX;
+        int startC = startY;
+        int exitR = exitX;
+        int exitC = exitY;
+
+        fill_n(&weightMatrix[0][0], 100*100, 0.0);
+        int dr[] = {-1, 0, 1, 0, -1, 1, 1, -1};
+        int dc[] = {0, 1, 0, -1, 1, 1, -1, -1};
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (floorPlan[i][j] == 0) {
+                    for (int k = 0; k < 8; k++) {
+                        int neighborR = i + dr[k];
+                        int neighborC = j + dc[k];
+
+                        if (neighborR < 0 || neighborC < 0 || neighborR >= m || neighborC >= n) {continue;}
+                        if (floorPlan[neighborR][neighborC] == 0) {
+                            int parID = convertCordToId(i, j, n);
+                            int childID = convertCordToId(neighborR, neighborC, n);
+                            double cost;
+                            if (k < 4) {cost = 1;} else {cost = 1.5;}
+                            weightMatrix[parID][childID] = cost;
+                        }
+                    }
+                }
+            }
+        }
+
+        vector<PathNode*> openList;
+        double gCosts[100] = {0.0};
+        bool visited[100] = {false};
+        int parent[100] = {-1};
+
+        fill_n(gCosts, 100, INFINITY);
+        fill_n(parent, 100, -1);
+
+        int startID = convertCordToId(startR, startC, n);
+        gCosts[startID] = 0.0;
+        double h = calculateH(startR, startC, exitR, exitC, mode);
+        PathNode* startNode = new PathNode(to_string(startID), gCosts[startID], h);
+        openList.push_back(startNode);
+
+        while (!openList.empty()) {
+            int curListID = findLowestFIndex(openList);
+            PathNode* curNode = openList[curListID];
+            int curID = stoi(curNode->name);
+            int curR = curID / n;
+            int curC = curID % n;
+            delete curNode;
+            openList.erase(openList.begin() + curListID);
+
+            if (curR == exitR && curC == exitC) {break;}
+
+            visited[curID] = true;
+            for (int i = 0; i < 100; i++) {
+                if (weightMatrix[curID][i] > 0 && !visited[i]) {
+                    double newG = weightMatrix[curID][i] + gCosts[curID];
+                    if (newG < gCosts[i]) {
+                        gCosts[i] = newG;
+                        visited[i] = true;
+                        parent[i] = curID;
+                        int iR = i / n; int iC = i % n;
+                        h = calculateH(iR, iC, exitR, exitC, mode);
+                        PathNode* node = new PathNode(to_string(i), gCosts[i], h);
+                        openList.push_back(node);
+                    }
+                }
+            }
+        }
+
+        int backtrackID = convertCordToId(exitR, exitC, n);
+        PathNode* head = nullptr;
+        while (parent[backtrackID] != -1) {
+            int backR = backtrackID / n;
+            int backC = backtrackID % n;
+            h = calculateH(backR, backC, exitR, exitC, mode);
+            PathNode* node = new PathNode(convertCoordToStr(backR, backC), gCosts[backtrackID], h);
+            head = addNodeToStart(head, node);
+            backtrackID = parent[backtrackID];
+        }
+        int backR = backtrackID / n;
+        int backC = backtrackID % n;
+        h = calculateH(backR, backC, exitR, exitC, mode);
+        PathNode* node = new PathNode(convertCoordToStr(backR, backC), gCosts[backtrackID], h);
+        head = addNodeToStart(head, node);
+
+        for (int i = 0; i < openList.size(); i++) {
+            delete openList[i];
+        }
+        openList.clear();
+
+        return head;
+    }
