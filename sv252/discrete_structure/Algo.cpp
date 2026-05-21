@@ -108,10 +108,11 @@ PathNode* findSocialPath(double adjMatrix[100][100], int startPerson, int goalPe
     return head;
 }
 
+
+
 string convertCoordToStr(int coord[2]) {
     return "(" + to_string(coord[0]) + "," + to_string(coord[1]) + ")";
 }
-
 
 /*
 – Mode 1: Manhattan distance — |x1 − x2| + |y1 − y2|
@@ -132,7 +133,8 @@ double calculateH(int x1, int y1, int x2, int y2, int mode) {
     return -1;
 }
 
-PathNode* findDronePath(double weightMatrix[100][100], int coords[100][2], int startPoint, int goalPoint, int mode) {
+PathNode* findDronePath(double weightMatrix[100][100], int coords[100][2], int startPoint, 
+    int goalPoint, int mode) {
     // Implementation goes here
     vector<PathNode*> openList;
     bool visited[100] = {false};    // have we visited this node
@@ -195,3 +197,105 @@ PathNode* findDronePath(double weightMatrix[100][100], int coords[100][2], int s
 
     return head;
 }
+
+
+
+int convertCordToId(int r, int c, int numCol) {
+    return r*numCol + c;
+}
+
+string getName(int childR, int childC, int parR, int parC) {
+    string res = "";
+    string seperator = "-";
+    if (parR > childR) {res += "Up";}
+    else if (parR < childR) {res += "Down";}
+    if (childC != parC && childR != parR) {res += seperator;}
+    if (parC > childC) {res += "Left";}
+    else if (parC < childC) {res += "Right";}
+    return res;
+}
+
+PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
+    int startY, int goalX, int goalY, int mode) {
+    // Implementation goes here
+    if (mode == 2) {mode = 3;}
+    int dr[] = {-1, 0, 1, 0, -1, 1, 1, -1};
+    int dc[] = {0, 1, 0, -1, 1, 1, -1, -1};
+    int startR = startX;
+    int startC = startY;
+    int goalR = goalX;
+    int goalC = goalY;
+
+    vector<PathNode*> openList;
+    bool visited[100*100] = {false};    // have we visited this node
+    int parentX[100*100] = {-1};     // the index node comes from the data node
+    int parentY[100*100] = {-1};
+    double gCosts[100*100] = {INFINITY};
+
+    fill_n(parentX, m*n, -1);
+    fill_n(parentY, m*n, -1);
+    fill_n(gCosts, m*n, INFINITY);
+    gCosts[convertCordToId(startR, startC, n)] = 0.0;
+
+    int startID = convertCordToId(startR, startC, n);
+    PathNode* startNode = new PathNode(to_string(startID), gCosts[startID], calculateH(startR, startC, goalR, goalC, mode));
+
+    openList.push_back(startNode);
+
+    while (!openList.empty()) {
+        int curIndex = findLowestFIndex(openList);
+        PathNode* curNode = openList[curIndex];
+        openList.erase(openList.begin() + curIndex);
+
+        int id = stoi(curNode->name);
+        int curR = id / n;
+        int curC = id % n;
+        delete curNode;
+
+        if (curR == goalR && curC == goalC) {break;}
+
+        visited[id] = true;
+        
+       for (int i = 0; i < 8; i++) {
+        int neighborR = curR + dr[i];
+        int neighborC = curC + dc[i];
+
+        if (neighborC < 0 || neighborR < 0 || neighborC >= n || neighborR >= m) {continue;}
+        if (warehouse[neighborR][neighborC] == 1) {continue;}
+        if (visited[convertCordToId(neighborR, neighborC, n)] == 1) {continue;}
+
+        int neighborID = convertCordToId(neighborR, neighborC, n);
+        double newG = gCosts[id];
+        if (i < 4) {newG += 1;} else {newG += 1.5;}
+        if (newG < gCosts[neighborID]) {
+            gCosts[neighborID] = newG;
+            parentX[neighborID] = curR;
+            parentY[neighborID] = curC;
+            double h = calculateH(neighborR, neighborC, goalR, goalC, mode);
+            PathNode* tempNode = new PathNode(to_string(neighborID), gCosts[neighborID], h);
+            openList.push_back(tempNode);
+        }
+       }
+    }
+
+    int backR = goalR;
+    int backC = goalC;
+    PathNode* head = nullptr;
+    while (!(backR == startR && backC == startC)) {
+        int backID = convertCordToId(backR, backC, n);
+        double h = calculateH(backR, backC, goalR, goalC, mode);
+        string name = getName(backR, backC, parentX[backID], parentY[backID]);
+        PathNode* node = new PathNode(name, gCosts[backID], h);
+        head = addNodeToStart(head, node);
+        backR = parentX[backID];
+        backC = parentY[backID];
+    }
+
+    for (int i = 0; i < openList.size(); i++) {
+        delete openList[i];
+    }
+    openList.clear();
+
+    return head;
+}
+

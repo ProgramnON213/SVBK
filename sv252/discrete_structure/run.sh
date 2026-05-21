@@ -1,1 +1,1 @@
-g++ -o main main.cpp PathNode.cpp -I . -std=c++11
+g++ -o main main.cpp PathNode.cpp Algo.cpp -I . -std=c++11
