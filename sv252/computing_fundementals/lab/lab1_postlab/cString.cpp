@@ -2,40 +2,39 @@
 #include <cstring>
 using namespace std;
 
+// Student may implement another function as need
+
 char toUpper(char c) {
-    if (c >= 'a' && c <= 'z') {return c - ('a' - 'A');}
+    if (c >= 'a' && c <= 'z') {c -= ('a'-'A');}
     return c;
 }
-
 char toLower(char c) {
-    if (c >= 'A' && c <= 'Z') {return c + ('a' - 'A');}
+    if (c >= 'A' && c <= 'Z') {c += ('a'-'A');}
     return c;
 }
-
 void process(const char *name, char *outstr) {
-    // TODO
-    int nameLength = strlen(name);
-    bool isNewWord = true;
-    int index = 0;
-    for (int i = 0; i < nameLength; i++) {
+    int length = strlen(name);
+    int idx = 0;
+    bool inWord = false;
+    
+    for (int i = 0; i < length; i++) {
         if (isalpha(name[i])) {
-            if (isNewWord) {
-                outstr[index] = toUpper(name[i]);
-                index++;
-                isNewWord = false;
+            if (!inWord) {
+                if (idx > 0) {outstr[idx++] = ' ';}
+                outstr[idx++] = toUpper(name[i]);
+                inWord = true;
             }
             else {
-                outstr[index] = toLower(name[i]);
-                index++;
-            }
-            if (i < nameLength-1 && !(isalpha(name[i+1]))) {
-                isNewWord = true;
-                outstr[index] = ' ';
-                index++;
+                outstr[idx++] = toLower(name[i]);
             }
         }
+        else if (name[i] == ' ' || name[i] == '\t') {
+                inWord = false;
+            }
     }
-    if(outstr[index-1] == ' ') {outstr[index-1] = '\0';}
+    
+    outstr[idx] = '\0';
+    if (idx > 0 && outstr[idx-1] == ' ') {outstr[idx-1] = '\0';}
 }
 
 int main() {
