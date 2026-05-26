@@ -329,15 +329,7 @@ int Luffy::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = calculateAttackDamge();
 
-    target->receiveDamage(damage);
-
-    /*
-    Morale only changes when the target is a character. Destroying a building does not count 
-    as defeating the target for triggering the morale increase. - Nguyen Tri Hai
-    if (target->isDestroyed()) {
-        context.setMorale(context.morale + 5);
-    }
-    */
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -346,7 +338,6 @@ int Luffy::calculateSkillDamage(BattleContext& context) {
     int damage = 2 * atk;
     atk += 15;
     speed += 15;
-    context.setAlarmLevel(context.alarmLevel + 10);
     int lostHp = multiplyStat(8, maxHp);
     setHPandState(hp - lostHp);
 
@@ -361,6 +352,8 @@ int Luffy::specialSkill(Character* target, BattleContext& context) {
     target->receiveDamage(damage);
     int realDamage = calculateDamage(damage, target->getDef());
 
+    context.setAlarmLevel(context.alarmLevel + 10);
+
     return realDamage;
 }
 
@@ -369,7 +362,8 @@ int Luffy::specialSkill(Building* target, BattleContext& context) {
     setEnergy(energy - energyRequirement);
     int damage = calculateSkillDamage(context);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
+    context.setAlarmLevel(context.alarmLevel + 10);
 
     return damage;
 }
@@ -411,7 +405,7 @@ int Zoro::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = atk + multiplyStat(20, def);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -442,7 +436,7 @@ int Zoro::specialSkill(Building* target, BattleContext& context) {
 
     int damage = multiplyStat(220, atk);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -482,7 +476,7 @@ int Sanji::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = atk + multiplyStat(50, speed);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
     
     return damage;
 }
@@ -512,14 +506,14 @@ int Sanji::specialSkill(Building* target, BattleContext& context) {
 
     int damage = multiplyStat(210, atk);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
 
 void Sanji::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killCharacterInTurn || destroyBuildingInTurn) {
+    if (killCharacterInTurn) {
         context.setMorale(context.morale + 8);
         atk = multiplyStat(110, atk);
     }
@@ -552,7 +546,7 @@ int Nami::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = multiplyStat(50, atk);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -584,7 +578,7 @@ int Nami::specialSkill(Building* target, BattleContext& context) {
     int damage = (atk + 40);
     damage = multiplyStat(150, damage);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     skillEffect(context);
 
@@ -593,7 +587,7 @@ int Nami::specialSkill(Building* target, BattleContext& context) {
 
 void Nami::endTurn(BattleContext& context) {
     // TODO: implement
-    if (killCharacterInTurn || destroyBuildingInTurn) {
+    if (killCharacterInTurn) {
         setEnergy(energy + 6);
     }
 }
@@ -622,7 +616,7 @@ int Chopper::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = atk;
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -674,7 +668,7 @@ int Usopp::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = multiplyStat(50, atk);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -700,7 +694,7 @@ int Usopp::specialSkill(Building* target, BattleContext& context) {
 
     int damage = multiplyStat(80, atk);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     context.setEscapeProgress(context.escapeProgress + 8);
 
@@ -763,7 +757,7 @@ int Franky::attack(Building* target, BattleContext& context) {
     // TODO: implement
     int damage = atk + multiplyStat(30, def);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -808,7 +802,7 @@ int Franky::specialSkill1(Building* target, BattleContext& context) {
     setEnergy(energy - 20);
     int damage = multiplyStat(180, atk);
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -827,7 +821,7 @@ int Franky::specialSkill2(Building* target, BattleContext& context) {
     setEnergy(energy - 30);
     int damage = target->getHP();
 
-    target->receiveDamage(damage);
+    target->takeDamge(damage, context);
 
     return damage;
 }
@@ -1146,6 +1140,15 @@ Building::~Building() {
 void Building::receiveDamage(int damage) {
     // TODO: implement
     setHPandState(hp - damage);
+}
+
+// receiveDamage but also call onDestroy
+void Building::takeDamge(int damage, BattleContext& context) {
+    setHPandState(hp - damage);
+    if (hp == 0) {
+        destroyed = true;
+        onDestroyed(context);
+    }
 }
 
 bool Building::isDestroyed() const {
@@ -1599,7 +1602,6 @@ void EniesLobbyBattle::processTurn(Character* character) {
     else if (targetBuilding != nullptr) {
         character->takeTurn(targetBuilding, context);
         if (targetBuilding->isDestroyed()) {
-            targetBuilding->onDestroyed(context);
             character->setDestroyBuildingInTurn(true);
         }
     }

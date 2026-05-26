@@ -350,6 +350,7 @@ public:
     virtual ~Building();
 
     void receiveDamage(int damage);
+    void takeDamge(int damage, BattleContext& context);
     bool isDestroyed() const;
 
     virtual void applyEffect(BattleContext& context) = 0;
