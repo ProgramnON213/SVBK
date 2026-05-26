@@ -1,7 +1,6 @@
 #include "eniesLobby.h"
 // REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
 // REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
-// REMINDER: Phương thức onDestroyed được áp dụng ngay lập tức khi công trình bị phá huỷ, tức là xảy ra trước khi các nhân vật tăng giảm alarmLevel nhé.
 /*
 "Mục tiêu" và "Đối thủ" trong ngữ cảnh tăng/giảm morale khi hạ gục chỉ là Character thôi nhé. - Le Duy Anh
 Tuy nhiên, phép so sánh điều kiện khác với phép tính trung gian, nên sẽ không thực hiện làm tròn kết quả của các vế khi thực hiện so sánh nhé. - Le Duy Anh
@@ -1252,8 +1251,8 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
     }
     if (context.escapeProgress >= 100) {
         // Fight end with STAW_HAT_WIN, see in checkEndCondition
-        context.battleEnded = true;
-        context.resultCode = "STRAW_HAT_WIN";
+        // context.battleEnded = true;
+        // context.resultCode = "STRAW_HAT_WIN";
     }
 }
 
@@ -1269,8 +1268,8 @@ void BusterCallShip::applyEffect(BattleContext& context) {
     }
     if (context.busterCallTimer <= 0) {
         // Fight end with BUSTER_CALL
-        context.battleEnded = true;
-        context.resultCode = "BUSTER_CALL";
+        // context.battleEnded = true;
+        // context.resultCode = "BUSTER_CALL";
     }
 }
 
@@ -1285,12 +1284,15 @@ void BusterCallShip::onDestroyed(BattleContext& context) {
 EniesLobbyBattle::EniesLobbyBattle(const string& filename) {
     // TODO: implement
     strawHats = new Character* [MAX_STRAW_HAT_COUNT];
+    for (int i = 0; i < MAX_STRAW_HAT_COUNT; i++) {strawHats[i] = nullptr;}
     strawHatCount = 0;
     
-    cp9Agents = new Character* [MAX_CHARACTER_COUNT];
+    cp9Agents = new Character* [MAX_CP9_COUNT];
+    for (int i = 0; i < MAX_CP9_COUNT; i++) {cp9Agents[i] = nullptr;}
     cp9Count = 0;
 
     buildings = new Building* [MAX_BUILDING_COUNT];
+    for (int i = 0; i < MAX_BUILDING_COUNT; i++) {buildings[i] = nullptr;}
     buildingCount = 0;
 
     battleEnded = false;
@@ -1565,18 +1567,24 @@ void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext&
         else if (!context.mainGateDestroyed) {
             targetBuilding = findBuildingWithName("MainGate");
         }
-        else if (context.alarmLevel >= 50 && !findBuildingWithName("Courthouse")->isDestroyed()) {
-            targetBuilding = findBuildingWithName("Courthouse");
+        else if (context.alarmLevel >= 50) {
+            Building* courthouse = findBuildingWithName("Courthouse");
+            if (courthouse != nullptr && !courthouse->isDestroyed()) {
+                targetBuilding = courthouse;
+            }
         }
-        else if (context.busterCallTimer <= 5 && !findBuildingWithName("BusterCallShip")->isDestroyed()) {
-            targetBuilding = findBuildingWithName("BusterCallShip");
+        else if (context.busterCallTimer <= 5) {
+            Building* ship = findBuildingWithName("BusterCallShip");
+            if (ship != nullptr && !ship->isDestroyed()) {
+                targetBuilding = ship;
+            }
         }
         else if (!context.robinRescued) {
             targetCharacter = firstCP9AgentAlive();
         }
         else if (context.robinRescued) {
             targetBuilding = findBuildingWithName("BridgeOfHesitation");
-            if (targetBuilding->isDestroyed() || targetBuilding == nullptr) {
+            if (targetBuilding == nullptr || targetBuilding->isDestroyed()) {
                 targetCharacter = firstCP9AgentAlive();
                 targetBuilding = nullptr;
             }

@@ -1,6 +1,4 @@
-
 #include "eniesLobby.h"
-
 using namespace std;
 
 int main(int argc, const char * argv[]) {
@@ -8,7 +6,7 @@ int main(int argc, const char * argv[]) {
         cout << "Usage: ./main <filename>" << endl;
         return -1;
     }
-    EniesLobbyBattle battle = EniesLobbyBattle(argv[1]);
+    EniesLobbyBattle battle(argv[1]);
     battle.runBattle();
     cout << battle.getResult() << endl;
     return 0;
