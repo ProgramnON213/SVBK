@@ -480,5 +480,6 @@ public:
 
 int setByCondition(int n, int min=0, int max=100);
 int calculateDamage(int damage, int def);
+int multiplyStat(int n, int damage);
 
 #endif
