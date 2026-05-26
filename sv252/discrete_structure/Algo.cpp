@@ -1,11 +1,15 @@
 #include "Algo.h"
 
-// Return the index in list of person with lowest F
+// Return the index in list of person with lowest F, if F is equal, return with lowest H
 int findLowestFIndex(vector<PathNode*> list) {
     double lowestF = list[0]->f;
     int idx = 0;
     for (int i = 0; i < list.size(); i++) {
         if (list[i]->f < lowestF) {
+            lowestF = list[i]->f;
+            idx = i;
+        }
+        else if (list[i]->f == lowestF && list[i]->h < list[idx]->h) {
             lowestF = list[i]->f;
             idx = i;
         }
