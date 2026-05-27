@@ -1,6 +1,7 @@
 #include "eniesLobby.h"
 // REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
 // REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
+// REMINDER: If a building is not in the file, what should we do?
 /*
 "Mục tiêu" và "Đối thủ" trong ngữ cảnh tăng/giảm morale khi hạ gục chỉ là Character thôi nhé. - Le Duy Anh
 Tuy nhiên, phép so sánh điều kiện khác với phép tính trung gian, nên sẽ không thực hiện làm tròn kết quả của các vế khi thực hiện so sánh nhé. - Le Duy Anh
@@ -283,10 +284,10 @@ Luffy::Luffy(string name, int hp, int atk, int def,
 
 int Luffy::calculateAttackDamge() const {
     int damage = atk;
-    if (hp <= (0.5 * hp) && hp > (0.3 * hp)) {
+    if (hp <= (0.5 * maxHp) && hp > (0.3 * maxHp)) {
         damage = multiplyStat(115, damage);
     }
-    else if (hp <= (0.3 * hp)) {
+    else if (hp <= (0.3 * maxHp)) {
         damage = multiplyStat(130, damage);
     }
     return damage;
@@ -624,7 +625,7 @@ int Chopper::specialSkill(Character* target, BattleContext& context) {
     // TODO: implement
     setEnergy(energy - energyRequirement);
 
-    int heal = multiplyStat(50, atk);
+    int heal = 35 + multiplyStat(50, atk);
 
     target->setHPandState(target->getHP() + heal);
     
@@ -1251,8 +1252,8 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
     }
     if (context.escapeProgress >= 100) {
         // Fight end with STAW_HAT_WIN, see in checkEndCondition
-        // context.battleEnded = true;
-        // context.resultCode = "STRAW_HAT_WIN";
+        context.battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN";
     }
 }
 
@@ -1268,8 +1269,8 @@ void BusterCallShip::applyEffect(BattleContext& context) {
     }
     if (context.busterCallTimer <= 0) {
         // Fight end with BUSTER_CALL
-        // context.battleEnded = true;
-        // context.resultCode = "BUSTER_CALL";
+        context.battleEnded = true;
+        context.resultCode = "BUSTER_CALL";
     }
 }
 
@@ -1564,32 +1565,31 @@ void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext&
         if (chopper && character->getEnergy() >= character->getEnergyRequirement()) {
             targetCharacter = lowestHPAliveStrawHat();
         }
-        else if (!context.mainGateDestroyed) {
+        else if (!context.mainGateDestroyed && findBuildingWithName("MainGate") != nullptr) {
             targetBuilding = findBuildingWithName("MainGate");
         }
-        else if (context.alarmLevel >= 50) {
-            Building* courthouse = findBuildingWithName("Courthouse");
-            if (courthouse != nullptr && !courthouse->isDestroyed()) {
-                targetBuilding = courthouse;
-            }
+        else {
+        Building* courthouse = findBuildingWithName("Courthouse");
+        Building* ship = findBuildingWithName("BusterCallShip");
+        if (context.alarmLevel >= 50 && courthouse != nullptr && !courthouse->isDestroyed()) {
+            targetBuilding = courthouse;
         }
-        else if (context.busterCallTimer <= 5) {
-            Building* ship = findBuildingWithName("BusterCallShip");
-            if (ship != nullptr && !ship->isDestroyed()) {
-                targetBuilding = ship;
-            }
+        else if (context.busterCallTimer <= 5 && ship != nullptr && !ship->isDestroyed()) {
+            targetBuilding = ship;
         }
         else if (!context.robinRescued) {
             targetCharacter = firstCP9AgentAlive();
         }
         else if (context.robinRescued) {
-            targetBuilding = findBuildingWithName("BridgeOfHesitation");
-            if (targetBuilding == nullptr || targetBuilding->isDestroyed()) {
+            Building* bridge = findBuildingWithName("BridgeOfHesitation");
+            if (bridge != nullptr && !bridge->isDestroyed()) {
+                targetBuilding = bridge;
+            } else {
                 targetCharacter = firstCP9AgentAlive();
-                targetBuilding = nullptr;
             }
         }
     }
+}
 
 void EniesLobbyBattle::processTurn(Character* character) {
     // TODO: implement
@@ -1698,8 +1698,9 @@ Character* EniesLobbyBattle::firstCP9AgentAlive() const {
 
 // Find the character with the lowest HP in strawHats that is still alive
 Character* EniesLobbyBattle::lowestHPAliveStrawHat() const {
-    Character* resultCharacter = nullptr;
-    int minHp = firstStrawHatAlive()->getHP();
+    Character* resultCharacter = firstStrawHatAlive();
+    if (resultCharacter == nullptr) {return nullptr;}
+    int minHp = resultCharacter->getHP();
 
     for (int i = 0; i < strawHatCount; i++) {
         Character* current = strawHats[i];
