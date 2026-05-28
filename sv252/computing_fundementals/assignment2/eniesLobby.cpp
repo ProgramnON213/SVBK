@@ -1401,8 +1401,14 @@ StrawHat* EniesLobbyBattle::createStrawHat(string name, int hp, int atk, int def
 
 void EniesLobbyBattle::addStrawHat(Character* character) {
     // TODO: implement
-    strawHats[strawHatCount] = character;
-    strawHatCount++;
+    int idx = findCharacterWithName(character->getName());
+    if (idx == -1) {
+        strawHats[strawHatCount] = character;
+        strawHatCount++;
+    }
+    else {
+        strawHats[idx] = character;
+    } 
 }
 
 CP9Agent* EniesLobbyBattle::createCP9Agent(string name, int hp, int atk, int def, int speed, 
@@ -1436,9 +1442,14 @@ CP9Agent* EniesLobbyBattle::createCP9Agent(string name, int hp, int atk, int def
 }
 
 void EniesLobbyBattle::addCP9Agent(Character* character) {
-    // TODO: implement
-    cp9Agents[cp9Count] = character;
-    cp9Count++;
+    int idx = findCharacterWithName(character->getName());
+    if (idx == -1) {
+        cp9Agents[cp9Count] = character;
+        cp9Count++;
+    }
+    else {
+        cp9Agents[idx] = character;
+    } 
 }
 
 Building* EniesLobbyBattle::createBuilding(string name, int hp) {
@@ -1466,8 +1477,14 @@ Building* EniesLobbyBattle::createBuilding(string name, int hp) {
 
 void EniesLobbyBattle::addBuilding(Building* building) {
     // TODO: implement
-    buildings[buildingCount] = building;
-    buildingCount++;
+    int idx = findIndexBuildingWithName(building->getName());
+    if (idx == -1) {
+        buildings[buildingCount] = building;
+        buildingCount++;
+    }
+    else {
+        buildings[idx] = building;
+    }
 }
 
 void EniesLobbyBattle::buildTurnOrder() {
@@ -1530,7 +1547,7 @@ void EniesLobbyBattle::moveNodeToEnd() {
 void EniesLobbyBattle::runBattle() {
     // TODO: implement
     while (!context.battleEnded) {
-        if (turnOrder->data->isAlive()) {
+        if (turnOrder != nullptr && turnOrder->data->isAlive()) {
             Character* character = turnOrder->data;
             processTurn(character);
         }
@@ -1549,7 +1566,6 @@ void EniesLobbyBattle::selectTarget(Character* character, BattleContext& context
     Character*& targetCharacter, Building*& targetBuilding) {
     targetCharacter = nullptr;
     targetBuilding = nullptr;
-    
     if (character->isStrawHat()) {
         selectTargetStrawHat(character, context, targetCharacter, targetBuilding);
     }
@@ -1679,7 +1695,7 @@ string EniesLobbyBattle::getResult() const {
 
 Character* EniesLobbyBattle::firstStrawHatAlive() const {
     int i = 0;
-    while(!strawHats[i]->isAlive() && i < strawHatCount) {
+    while(i < strawHatCount && !strawHats[i]->isAlive()) {
         i++;
     }
     if (i >= strawHatCount) {return nullptr;}
@@ -1688,7 +1704,7 @@ Character* EniesLobbyBattle::firstStrawHatAlive() const {
 
 Character* EniesLobbyBattle::firstCP9AgentAlive() const {
     int i = 0;
-    while (!cp9Agents[i]->isAlive() && i < cp9Count) {
+    while (i < cp9Count && !cp9Agents[i]->isAlive()) {
         i++;
     }
     if (i >= cp9Count) {return nullptr;}
@@ -1720,6 +1736,25 @@ Building* EniesLobbyBattle::findBuildingWithName(string name) {
         }
     }
     return nullptr;
+}
+
+// Only gives the index in the array, you have to decide whether it is StrawHat or CP9
+int EniesLobbyBattle::findCharacterWithName(string name) const {
+    for (int i = 0; i < strawHatCount; i++) {
+        if (strawHats[i]->getName() == name) {return i;}
+    }
+    for (int i = 0; i < cp9Count; i++) {
+        if (cp9Agents[i]->getName() == name) {return i;}
+    }
+    return -1;
+}
+
+// Gives the index in the array
+int EniesLobbyBattle::findIndexBuildingWithName(string name) const {
+    for (int i = 0; i < buildingCount; i++) {
+        if (buildings[i]->getName() == name) {return i;}
+    }
+    return -1;
 }
 
 // Clamp stat

@@ -470,6 +470,8 @@ public:
     Character* lowestHPAliveStrawHat() const;
 
     Building* findBuildingWithName(string name);
+    int findCharacterWithName(string name) const;
+    int findIndexBuildingWithName(string name) const;
 
     void tempLog();
     void tempLogObjects();
