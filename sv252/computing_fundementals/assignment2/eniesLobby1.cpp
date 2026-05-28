@@ -1368,6 +1368,8 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
     }
 
     buildTurnOrder();
+
+    if (findBuildingWithName("MainGate") == nullptr) {context.mainGateDestroyed = true;}
 }
 
 StrawHat* EniesLobbyBattle::createStrawHat(string name, int hp, int atk, int def, int speed, 

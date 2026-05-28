@@ -1,7 +1,6 @@
 #include "eniesLobby.h"
 // REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
 // REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
-// REMINDER: If a building is not in the file, what should we do?
 /*
 "Mục tiêu" và "Đối thủ" trong ngữ cảnh tăng/giảm morale khi hạ gục chỉ là Character thôi nhé. - Le Duy Anh
 Tuy nhiên, phép so sánh điều kiện khác với phép tính trung gian, nên sẽ không thực hiện làm tròn kết quả của các vế khi thực hiện so sánh nhé. - Le Duy Anh

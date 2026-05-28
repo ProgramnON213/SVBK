@@ -3105,7 +3105,8 @@ TEST_CASE("test_custom_random_42")
 
     EniesLobbyBattle battle("test.txt");
     battle.runBattle();
-    CHECK(battle.getResult() == "STRAW_HAT_WIN 14 69 58 100 100 80");
+    CHECK(battle.getResult() == "TIME_OUT 51 68 58 100 46 45");
+    // REMINDER: Potentially wrong since Vo Tien's code attack NULL if target not found
     remove("test.txt");
 }
 
@@ -3223,6 +3224,7 @@ TEST_CASE("test_custom_random_46")
     EniesLobbyBattle battle("test.txt");
     battle.runBattle();
     CHECK(battle.getResult() == "BUSTER_CALL 58 31 100 91 46 0");
+    // REMINDER: Potentially wrong also
     remove("test.txt");
 }
 
