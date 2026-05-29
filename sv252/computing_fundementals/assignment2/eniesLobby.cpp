@@ -68,16 +68,6 @@ void BattleContext::setBusterCallTimer(int busterCallTimer) {
     }
 };
 
-void BattleContext::logContext() const {
-    cout << "Logging context" << endl;
-    cout << boolalpha << "turnCount=" << turnCount << ", morale=" << morale << ", alarmLevel=" << alarmLevel << 
-    ", rescueProgress=" << rescueProgress << ", escapeProgress=" << escapeProgress <<
-    ", busterCallTimer=" << busterCallTimer << ", mainGateDestroyed=" << mainGateDestroyed <<
-    ", robinRescued=" << robinRescued << ", bridgeOpened=" << bridgeOpened << 
-    ", battleEnded=" << battleEnded << ", resultCode=" << resultCode << endl;
-    cout << "Logging context completed" << endl;
-}
-
 /*
  * Character
  */
@@ -1344,7 +1334,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             stream >> name >> hp >> atk >> def >> speed >> energy >> bounty;
 
             StrawHat* pirate = createStrawHat(name, hp, atk, def, speed, energy, bounty);
-            addStrawHat(pirate);
+            if (pirate) {addStrawHat(pirate);}
         }
 
         else if (lineObjectType == "CP9") {
@@ -1353,7 +1343,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             stream >> name >> hp >> atk >> def >> speed >> energy >> doriki;
 
             CP9Agent* agent = createCP9Agent(name, hp, atk, def, speed, energy, doriki);
-            addCP9Agent(agent);
+            if (agent) {addCP9Agent(agent);}
         }
 
         else if (lineObjectType == "BUILDING") {
@@ -1362,7 +1352,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             stream >> name >> hp;
 
             Building* building = createBuilding(name, hp);
-            addBuilding(building);
+            if (building) {addBuilding(building);}
         }
     }
 
@@ -1779,46 +1769,3 @@ int calculateDamage(int damage, int def) {
 int multiplyStat(int percentage, int n) {
     return (n * percentage + 99) / 100;
 }
-
-
-
-void EniesLobbyBattle::tempLog() {
-    context.logContext();
-}
-
-void EniesLobbyBattle::tempLogObjects() {
-    cout << "Logging objects" << endl;
-    for (int i = 0; i < strawHatCount; i++) {
-        cout << strawHats[i]->str() << endl;
-    }
-    for (int i = 0; i < cp9Count; i++) {
-        cout << cp9Agents[i]->str() << endl;
-    }
-    for (int i = 0; i < buildingCount; i++) {
-        cout << buildings[i]->str() << endl;
-    }
-    cout << "Logging objects completed" << endl;
-}
-
-void EniesLobbyBattle::tempLogTurnNode() {
-    cout << "Logging turn order" << endl;
-    TurnNode* temp = turnOrder;
-    while (temp != nullptr) {
-        cout << temp->data->str() << endl;
-        temp = temp->next;
-    }
-    cout << "Logging turn order completed" << endl;
-}
-
-void EniesLobbyBattle::tempLogCharacterAndTarget(Character* character, Character* targetCharacter, 
-        Building* targetBuilidng) {
-            cout << "Logging character and target" << endl;
-            cout << character->str() << endl;
-            if (targetCharacter != nullptr) {
-                cout << targetCharacter->str() << endl;
-            }
-            else if (targetBuilidng != nullptr) {
-                cout << targetBuilidng->str() << endl;
-            }
-            cout << "Logging character and target completed" << endl;
-        }

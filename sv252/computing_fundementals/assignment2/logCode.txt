@@ -7,6 +7,16 @@ In class EniesLobbyBattle in eniesLobby.h:
 
 
 In eniesLobby.cpp:
+void BattleContext::logContext() const {
+    cout << "Logging context" << endl;
+    cout << boolalpha << "turnCount=" << turnCount << ", morale=" << morale << ", alarmLevel=" << alarmLevel << 
+    ", rescueProgress=" << rescueProgress << ", escapeProgress=" << escapeProgress <<
+    ", busterCallTimer=" << busterCallTimer << ", mainGateDestroyed=" << mainGateDestroyed <<
+    ", robinRescued=" << robinRescued << ", bridgeOpened=" << bridgeOpened << 
+    ", battleEnded=" << battleEnded << ", resultCode=" << resultCode << endl;
+    cout << "Logging context completed" << endl;
+}
+
 void EniesLobbyBattle::tempLog() {
     context.logContext();
 }

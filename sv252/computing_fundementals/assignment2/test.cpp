@@ -3223,7 +3223,7 @@ TEST_CASE("test_custom_random_46")
 
     EniesLobbyBattle battle("test.txt");
     battle.runBattle();
-    CHECK(battle.getResult() == "BUSTER_CALL 58 31 100 91 46 0");
+    CHECK(battle.getResult() == "STRAW_HAT_WIN_BY_DEFEAT_CP9 16 77 77 91 54 43");
     // REMINDER: Potentially wrong also
     remove("test.txt");
 }

@@ -331,8 +331,6 @@ public:
     void setRescueProgress(int rescueProgress);
     void setEscapeProgress(int escapeProgress);
     void setBusterCallTimer(int busterCallTimer);
-
-    void logContext() const;
 };
 
 /*
@@ -472,12 +470,6 @@ public:
     Building* findBuildingWithName(string name);
     int findCharacterWithName(string name) const;
     int findIndexBuildingWithName(string name) const;
-
-    void tempLog();
-    void tempLogObjects();
-    void tempLogTurnNode();
-    void tempLogCharacterAndTarget(Character* character, Character* targetCharacter, 
-        Building* targetBuilidng);
 };
 
 
