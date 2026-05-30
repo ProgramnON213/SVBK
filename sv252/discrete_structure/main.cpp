@@ -1,12 +1,23 @@
-#include "Algo.h" // Assuming your function is declared here
+#include "Algo.h"
 
 void printPath(PathNode* head);
 void testTask1();
 void testTask2();
 void testTask3();
+void testTask4();
 
 int main() {
+    cout << "==========TASK 1==========" << endl;
+    testTask1();
+
+    cout << "==========TASK 2==========" << endl;
+    testTask2();
+
+    cout << "==========TASK 3==========" << endl;
     testTask3();
+
+    cout << "==========TASK 4==========" << endl;
+    testTask4();
 
     return 0;
 }
@@ -97,6 +108,39 @@ void testTask3() {
     delete path1;
     delete path2;
 }
+
+void testTask4() {
+    int m = 4;      int n = 4;
+    int startX = 0; int startY = 0;
+    int goalX = 3;  int goalY = 3;
+
+    vector<vector<int>> visualGrid = {
+        {0, 0, 0, 0},
+        {0, 1, 1, 0},
+        {0, 0, 1, 0},
+        {0, 0, 0, 0}
+    };
+
+    int floorPlan[100][100] = {0};
+    int ROWS = visualGrid.size();
+    int COLS = visualGrid[0].size();
+
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            floorPlan[y][x] = visualGrid[y][x];
+        }
+    }
+
+    double weightMatrix[100][100] = {0};
+
+    PathNode* path1 = findEvacuationRoute(floorPlan, m, n, startX, startY, goalX, goalY, weightMatrix, 1);
+    PathNode* path2 = findEvacuationRoute(floorPlan, m, n, startX, startY, goalX, goalY, weightMatrix, 2);
+    printPath(path1);
+    printPath(path2);
+    delete path1;
+    delete path2;
+}
+
 
 void printPath(PathNode* head) {
     cout << "Solution Path:\n";
