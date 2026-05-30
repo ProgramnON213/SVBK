@@ -250,13 +250,11 @@ PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
     openList.push_back(startNode);
 
     while (!openList.empty()) {
-        tempLogOpenList(openList);
         int curIndex = findLowestFIndex(openList);
         PathNode* curNode = openList[curIndex];
         openList.erase(openList.begin() + curIndex);
 
         int id = stoi(curNode->name);
-        cout << id << " " << curNode->f << "|" << curNode->g << endl;
         int curR = id / n;
         int curC = id % n;
         delete curNode;
@@ -360,7 +358,6 @@ PathNode* findEvacuationRoute(int floorPlan[100][100], int m, int n,
             int curID = stoi(curNode->name);
             int curR = curID / n;
             int curC = curID % n;
-            cout << curR << curC << " " << curNode->f << endl;
             delete curNode;
             openList.erase(openList.begin() + curListID);
 
