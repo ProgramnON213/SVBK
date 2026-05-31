@@ -133,8 +133,8 @@ void testTask4() {
 
     double weightMatrix[100][100] = {0};
 
-    PathNode* path1 = findEvacuationRoute(floorPlan, m, n, startX, startY, goalX, goalY, weightMatrix, 1);
-    PathNode* path2 = findEvacuationRoute(floorPlan, m, n, startX, startY, goalX, goalY, weightMatrix, 2);
+    PathNode* path1 = findEvacuationPath(floorPlan, m, n, startX, startY, goalX, goalY, weightMatrix, 1);
+    PathNode* path2 = findEvacuationPath(floorPlan, m, n, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(path1);
     printPath(path2);
     delete path1;

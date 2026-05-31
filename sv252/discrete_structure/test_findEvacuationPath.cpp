@@ -104,10 +104,10 @@ TEST_CASE("test_001")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
 
     cout << "Part of weight Matrix\n";
@@ -183,10 +183,10 @@ TEST_CASE("test_002")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 0; i < 10; i++)
@@ -260,10 +260,10 @@ TEST_CASE("test_003")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 0; i < 10; i++)
@@ -328,10 +328,10 @@ TEST_CASE("test_004")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 0; i < 10; i++)
@@ -393,10 +393,10 @@ TEST_CASE("test_005")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 10; i < 20; i++)
@@ -468,10 +468,10 @@ TEST_CASE("test_006")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 20; i < 30; i++)
@@ -545,10 +545,10 @@ TEST_CASE("test_007")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 30; i < 40; i++)
@@ -622,10 +622,10 @@ TEST_CASE("test_008")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 30; i < 40; i++)
@@ -693,10 +693,10 @@ TEST_CASE("test_009")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 30; i < 40; i++)
@@ -773,10 +773,10 @@ TEST_CASE("test_010")
     int r = 9, c = 10;
     double weightMatrix[100][100];
     PathNode *OutPath;
-    OutPath = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
+    OutPath = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 1);
     printPath(OutPath);
     PathNode *OutPath1;
-    OutPath1 = findPathInMaze2(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
+    OutPath1 = findEvacuationPath(floorPlan1, r, c, startX, startY, goalX, goalY, weightMatrix, 2);
     printPath(OutPath1);
     cout << "Part of weight Matrix\n";
     for (int i = 70; i < 80; i++)

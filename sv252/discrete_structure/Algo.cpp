@@ -307,7 +307,7 @@ PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
 }
 
 
-PathNode* findEvacuationRoute(int floorPlan[100][100], int m, int n, 
+PathNode* findEvacuationPath(int floorPlan[100][100], int m, int n, 
     int startX, int startY, int exitX, int exitY, double weightMatrix[100][100], int mode) {
         // Scanning the floor
         if (mode == 2) {mode = 3;}
@@ -342,6 +342,7 @@ PathNode* findEvacuationRoute(int floorPlan[100][100], int m, int n,
         vector<PathNode*> openList;
         double gCosts[100] = {0.0};
         int parent[100] = {-1};
+        bool visited[100] = {false};
 
         fill_n(gCosts, 100, INFINITY);
         fill_n(parent, 100, -1);
@@ -363,8 +364,9 @@ PathNode* findEvacuationRoute(int floorPlan[100][100], int m, int n,
 
             if (curR == exitR && curC == exitC) {break;}
 
+            if (!visited[curID]) {visited[curID] = true;} else {continue;}
             for (int i = 0; i < 100; i++) {
-                if (weightMatrix[curID][i] > 0) {
+                if (weightMatrix[curID][i] > 0 && !visited[i]) {
                     double newG = weightMatrix[curID][i] + gCosts[curID];
                     if (newG < gCosts[i]) {
                         gCosts[i] = newG;
@@ -401,122 +403,3 @@ PathNode* findEvacuationRoute(int floorPlan[100][100], int m, int n,
 
         return head;
     }
-
-
-PathNode* findPathInMaze2(int floorPlan[100][100], int m, int n, int startX, 
-    int startY, int exitX, int exitY, double weightMatrix[100][100], int mode) {
-        // Scanning the floor
-        if (mode == 2) {mode = 3;}
-        int startR = startX;
-        int startC = startY;
-        int exitR = exitX;
-        int exitC = exitY;
-
-        fill_n(&weightMatrix[0][0], 100*100, 0.0);
-        int dr[] = {-1, 0, 0, 1, -1, -1, 1, 1};
-        int dc[] = {0, -1, 1, 0, -1, 1, -1, 1};
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (floorPlan[i][j] == 0) {
-                    for (int k = 0; k < 8; k++) {
-                        int neighborR = i + dr[k];
-                        int neighborC = j + dc[k];
-
-                        if (neighborR < 0 || neighborC < 0 || neighborR >= m || neighborC >= n) {continue;}
-                        if (floorPlan[neighborR][neighborC] == 0) {
-                            int parID = convertCordToId(i, j, n);
-                            int childID = convertCordToId(neighborR, neighborC, n);
-                            double cost;
-                            if (k < 4) {cost = 1;} else {cost = 1.5;}
-                            weightMatrix[parID][childID] = cost;
-                        }
-                    }
-                }
-            }
-        }
-
-
-    vector<PathNode*> openList;
-    bool visited[100*100] = {false};    // have we visited this node
-    int parentX[100*100] = {-1};     // the index node comes from the data node
-    int parentY[100*100] = {-1};
-    double gCosts[100*100] = {INFINITY};
-
-    fill_n(parentX, m*n, -1);
-    fill_n(parentY, m*n, -1);
-    fill_n(gCosts, m*n, INFINITY);
-    gCosts[convertCordToId(startR, startC, n)] = 0.0;
-
-    int startID = convertCordToId(startR, startC, n);
-    PathNode* startNode = new PathNode(to_string(startID), gCosts[startID], calculateH(startR, startC, exitR, exitC, mode));
-
-    openList.push_back(startNode);
-
-    while (!openList.empty()) {
-        int curIndex = findLowestFIndex(openList);
-        PathNode* curNode = openList[curIndex];
-        openList.erase(openList.begin() + curIndex);
-
-        int id = stoi(curNode->name);
-        int curR = id / n;
-        int curC = id % n;
-        delete curNode;
-
-        if (curR == exitR && curC == exitC) {break;}
-
-        visited[id] = true;
-        
-       for (int i = 0; i < 8; i++) {
-        int neighborR = curR + dr[i];
-        int neighborC = curC + dc[i];
-
-        if (neighborC < 0 || neighborR < 0 || neighborC >= n || neighborR >= m) {continue;}
-        if (floorPlan[neighborR][neighborC] == 1) {continue;}
-        if (visited[convertCordToId(neighborR, neighborC, n)] == 1) {continue;}
-
-        int neighborID = convertCordToId(neighborR, neighborC, n);
-        double newG = gCosts[id];
-        if (i < 4) {newG += 1;} else {newG += 1.5;}
-        if (newG < gCosts[neighborID]) {
-            gCosts[neighborID] = newG;
-            parentX[neighborID] = curR;
-            parentY[neighborID] = curC;
-            double h = calculateH(neighborR, neighborC, exitR, exitC, mode);
-            PathNode* tempNode = new PathNode(to_string(neighborID), gCosts[neighborID], h);
-            openList.push_back(tempNode);
-        }
-       }
-    }
-
-    int backR = exitR;
-    int backC = exitC;
-    PathNode* head = nullptr;
-    while (!(backR == startR && backC == startC)) {
-        int backID = convertCordToId(backR, backC, n);
-        double h = calculateH(backR, backC, exitR, exitC, mode);
-        string name = convertCoordToStr(backR, backC);
-        PathNode* node = new PathNode(name, gCosts[backID], h);
-        head = addNodeToStart(head, node);
-        backR = parentX[backID];
-        backC = parentY[backID];
-    }
-    int backID = convertCordToId(backR, backC, n);
-    double h = calculateH(backR, backC, exitR, exitC, mode);
-    string name = convertCoordToStr(backR, backC);
-    PathNode* node = new PathNode(name, gCosts[backID], h);
-    head = addNodeToStart(head, node);
-
-    for (int i = 0; i < openList.size(); i++) {
-        delete openList[i];
-    }
-    openList.clear();
-
-    return head;
-}
-
-void tempLogOpenList(vector<PathNode*> list) {
-    for (int i = 0; i < list.size(); i++) {
-        cout << list[i]->name << " " << list[i]->f << " " << list[i]->g << endl;
-    }
-    cout << "Printed list" << endl;
-}
