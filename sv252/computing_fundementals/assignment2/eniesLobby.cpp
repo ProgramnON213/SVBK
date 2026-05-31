@@ -326,7 +326,7 @@ int Luffy::attack(Building* target, BattleContext& context) {
 int Luffy::calculateSkillDamage(BattleContext& context) {
     int damage = 2 * atk;
     atk += 15;
-    speed += 15;
+    setSpeed(speed + 15);
     int lostHp = multiplyStat(8, maxHp);
     setHPandState(hp - lostHp);
 
@@ -893,7 +893,7 @@ int Lucci::specialSkill(Character* target, BattleContext& context) {
     int damage = multiplyStat(280, atk);
 
     int tempDef = target->getDef();
-    target->setDef(tempDef - multiplyStat(50, tempDef));
+    target->setDef(multiplyStat(50, tempDef));
     target->receiveDamage(damage);
     int realDamage = calculateDamage(damage, target->getDef());
     target->setDef(tempDef);
