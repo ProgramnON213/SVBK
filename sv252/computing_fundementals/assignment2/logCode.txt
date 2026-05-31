@@ -6,6 +6,8 @@ In class EniesLobbyBattle in eniesLobby.h:
         Building* targetBuilidng);
 
 
+void logContext() const;
+
 In eniesLobby.cpp:
 void BattleContext::logContext() const {
     cout << "Logging context" << endl;

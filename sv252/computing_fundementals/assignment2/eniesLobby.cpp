@@ -966,7 +966,7 @@ int Jabra::specialSkill(Character* target, BattleContext& context) {
     setEnergy(energy - energyRequirement);
     int damage = multiplyStat(150, atk);
     if (hp < (0.3 * maxHp)) {
-        damage = multiplyStat(125, atk);
+        damage = multiplyStat(125, damage);
     }
 
     target->receiveDamage(damage);
@@ -1217,10 +1217,8 @@ TowerOfJustice::TowerOfJustice(string name, int hp) : Building(name, hp) {}
 
 void TowerOfJustice::applyEffect(BattleContext& context) {
     // TODO: implement
-    if (!context.robinRescued) {
-        if (context.mainGateDestroyed && !context.robinRescued) {
-            context.setRescueProgress(context.rescueProgress + 5);
-        }
+    if (context.mainGateDestroyed && !context.robinRescued) {
+        context.setRescueProgress(context.rescueProgress + 5);
         if (context.rescueProgress >= 100) {
             context.robinRescued = true;
             context.setMorale(context.morale + 10);
@@ -1238,12 +1236,14 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
     if (context.robinRescued) {
         context.bridgeOpened = true;
         context.setEscapeProgress(context.escapeProgress + 5);
-    }
-    if (context.escapeProgress >= 100) {
-        // Fight end with STAW_HAT_WIN, see in checkEndCondition
+
+        if (context.escapeProgress >= 100) {
+        // Fight end with STAW_HAT_WIN
         context.battleEnded = true;
         context.resultCode = "STRAW_HAT_WIN";
     }
+    }
+    
 }
 
 /*
@@ -1255,12 +1255,13 @@ void BusterCallShip::applyEffect(BattleContext& context) {
     // TODO: implement
     if (!isDestroyed()) {
         context.setBusterCallTimer(context.busterCallTimer - 1);
+        if (context.busterCallTimer <= 0) {
+            // Fight end with BUSTER_CALL
+            context.battleEnded = true;
+            context.resultCode = "BUSTER_CALL";
+        }
     }
-    if (context.busterCallTimer <= 0) {
-        // Fight end with BUSTER_CALL
-        context.battleEnded = true;
-        context.resultCode = "BUSTER_CALL";
-    }
+    
 }
 
 void BusterCallShip::onDestroyed(BattleContext& context) {
@@ -1286,6 +1287,7 @@ EniesLobbyBattle::EniesLobbyBattle(const string& filename) {
     buildingCount = 0;
 
     battleEnded = false;
+    turnOrder = nullptr;
 
     loadFromFile(filename);
 }
@@ -1397,6 +1399,7 @@ void EniesLobbyBattle::addStrawHat(Character* character) {
         strawHatCount++;
     }
     else {
+        delete strawHats[idx];
         strawHats[idx] = character;
     } 
 }
@@ -1438,6 +1441,7 @@ void EniesLobbyBattle::addCP9Agent(Character* character) {
         cp9Count++;
     }
     else {
+        delete cp9Agents[idx];
         cp9Agents[idx] = character;
     } 
 }
@@ -1473,6 +1477,7 @@ void EniesLobbyBattle::addBuilding(Building* building) {
         buildingCount++;
     }
     else {
+        delete buildings[idx];
         buildings[idx] = building;
     }
 }
@@ -1536,6 +1541,8 @@ void EniesLobbyBattle::moveNodeToEnd() {
 
 void EniesLobbyBattle::runBattle() {
     // TODO: implement
+    checkEndCondition();
+    
     while (!context.battleEnded) {
         if (turnOrder != nullptr && turnOrder->data->isAlive()) {
             Character* character = turnOrder->data;
@@ -1576,7 +1583,7 @@ void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext&
         else {
         Building* courthouse = findBuildingWithName("Courthouse");
         Building* ship = findBuildingWithName("BusterCallShip");
-        if (context.alarmLevel >= 50 && courthouse != nullptr && !courthouse->isDestroyed()) {
+        if (context.mainGateDestroyed && context.alarmLevel >= 50 && courthouse != nullptr && !courthouse->isDestroyed()) {
             targetBuilding = courthouse;
         }
         else if (context.busterCallTimer <= 5 && ship != nullptr && !ship->isDestroyed()) {

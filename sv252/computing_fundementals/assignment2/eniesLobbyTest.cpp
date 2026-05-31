@@ -68,16 +68,6 @@ void BattleContext::setBusterCallTimer(int busterCallTimer) {
     }
 };
 
-void BattleContext::logContext() const {
-    cout << "Logging context" << endl;
-    cout << boolalpha << "turnCount=" << turnCount << ", morale=" << morale << ", alarmLevel=" << alarmLevel << 
-    ", rescueProgress=" << rescueProgress << ", escapeProgress=" << escapeProgress <<
-    ", busterCallTimer=" << busterCallTimer << ", mainGateDestroyed=" << mainGateDestroyed <<
-    ", robinRescued=" << robinRescued << ", bridgeOpened=" << bridgeOpened << 
-    ", battleEnded=" << battleEnded << ", resultCode=" << resultCode << endl;
-    cout << "Logging context completed" << endl;
-}
-
 /*
  * Character
  */
@@ -976,7 +966,7 @@ int Jabra::specialSkill(Character* target, BattleContext& context) {
     setEnergy(energy - energyRequirement);
     int damage = multiplyStat(150, atk);
     if (hp < (0.3 * maxHp)) {
-        damage = multiplyStat(125, atk);
+        damage = multiplyStat(125, damage);
     }
 
     target->receiveDamage(damage);
@@ -1251,8 +1241,8 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
     }
     if (context.escapeProgress >= 100) {
         // Fight end with STAW_HAT_WIN, see in checkEndCondition
-        context.battleEnded = true;
-        context.resultCode = "STRAW_HAT_WIN";
+        // context.battleEnded = true;
+        // context.resultCode = "STRAW_HAT_WIN";
     }
 }
 
@@ -1296,6 +1286,7 @@ EniesLobbyBattle::EniesLobbyBattle(const string& filename) {
     buildingCount = 0;
 
     battleEnded = false;
+    turnOrder = nullptr;
 
     loadFromFile(filename);
 }
@@ -1344,7 +1335,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             stream >> name >> hp >> atk >> def >> speed >> energy >> bounty;
 
             StrawHat* pirate = createStrawHat(name, hp, atk, def, speed, energy, bounty);
-            addStrawHat(pirate);
+            if (pirate) {addStrawHat(pirate);}
         }
 
         else if (lineObjectType == "CP9") {
@@ -1353,7 +1344,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             stream >> name >> hp >> atk >> def >> speed >> energy >> doriki;
 
             CP9Agent* agent = createCP9Agent(name, hp, atk, def, speed, energy, doriki);
-            addCP9Agent(agent);
+            if (agent) {addCP9Agent(agent);}
         }
 
         else if (lineObjectType == "BUILDING") {
@@ -1362,7 +1353,7 @@ void EniesLobbyBattle::loadFromFile(const string& filename) {
             stream >> name >> hp;
 
             Building* building = createBuilding(name, hp);
-            addBuilding(building);
+            if (building) {addBuilding(building);}
         }
     }
 
@@ -1407,6 +1398,7 @@ void EniesLobbyBattle::addStrawHat(Character* character) {
         strawHatCount++;
     }
     else {
+        delete strawHats[idx];
         strawHats[idx] = character;
     } 
 }
@@ -1448,6 +1440,7 @@ void EniesLobbyBattle::addCP9Agent(Character* character) {
         cp9Count++;
     }
     else {
+        delete cp9Agents[idx];
         cp9Agents[idx] = character;
     } 
 }
@@ -1483,6 +1476,7 @@ void EniesLobbyBattle::addBuilding(Building* building) {
         buildingCount++;
     }
     else {
+        delete buildings[idx];
         buildings[idx] = building;
     }
 }
@@ -1546,6 +1540,8 @@ void EniesLobbyBattle::moveNodeToEnd() {
 
 void EniesLobbyBattle::runBattle() {
     // TODO: implement
+    checkEndCondition();
+    context.logContext();
     while (!context.battleEnded) {
         if (turnOrder != nullptr && turnOrder->data->isAlive()) {
             Character* character = turnOrder->data;
@@ -1557,7 +1553,7 @@ void EniesLobbyBattle::runBattle() {
         processBuildings();
 
         context.nextTurn();
-
+        context.logContext();
         checkEndCondition();
     }
 }
@@ -1586,7 +1582,7 @@ void EniesLobbyBattle::selectTargetStrawHat(Character* character, BattleContext&
         else {
         Building* courthouse = findBuildingWithName("Courthouse");
         Building* ship = findBuildingWithName("BusterCallShip");
-        if (context.alarmLevel >= 50 && courthouse != nullptr && !courthouse->isDestroyed()) {
+        if (context.mainGateDestroyed && context.alarmLevel >= 50 && courthouse != nullptr && !courthouse->isDestroyed()) {
             targetBuilding = courthouse;
         }
         else if (context.busterCallTimer <= 5 && ship != nullptr && !ship->isDestroyed()) {
@@ -1610,6 +1606,7 @@ void EniesLobbyBattle::processTurn(Character* character) {
     // TODO: implement
     Character* targetCharacter; Building* targetBuilding;
     selectTarget(character, context, targetCharacter, targetBuilding);
+    tempLogCharacterAndTarget(character, targetCharacter, targetBuilding);
     character->setkillCharacterInTurn(false);
     character->setDestroyBuildingInTurn(false);
     if (Fukurou* fukurou = dynamic_cast<Fukurou*>(character)) {
@@ -1781,6 +1778,15 @@ int multiplyStat(int percentage, int n) {
 }
 
 
+void BattleContext::logContext() const {
+    cout << "Logging context" << endl;
+    cout << boolalpha << "turnCount=" << turnCount << ", morale=" << morale << ", alarmLevel=" << alarmLevel << 
+    ", rescueProgress=" << rescueProgress << ", escapeProgress=" << escapeProgress <<
+    ", busterCallTimer=" << busterCallTimer << ", mainGateDestroyed=" << mainGateDestroyed <<
+    ", robinRescued=" << robinRescued << ", bridgeOpened=" << bridgeOpened << 
+    ", battleEnded=" << battleEnded << ", resultCode=" << resultCode << endl;
+    cout << "Logging context completed" << endl;
+}
 
 void EniesLobbyBattle::tempLog() {
     context.logContext();
