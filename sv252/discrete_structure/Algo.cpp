@@ -187,7 +187,8 @@ PathNode* findDronePath(double weightMatrix[100][100], int coords[100][2], int s
 
     int backtrackPoint = goalPoint;
     PathNode* head = nullptr;
-    while (backtrackPoint != startPoint) {
+    if (parent[backtrackPoint] != -1) {
+        while (backtrackPoint != startPoint) {
         double h = calculateH(coords[backtrackPoint][0], coords[backtrackPoint][1], goalX, goalY, mode);
         PathNode* node = new PathNode(convertCoordToStr(coords[backtrackPoint]), gCosts[backtrackPoint], h);
         head = addNodeToStart(head, node);
@@ -196,6 +197,7 @@ PathNode* findDronePath(double weightMatrix[100][100], int coords[100][2], int s
     double h = calculateH(coords[backtrackPoint][0], coords[backtrackPoint][1], goalX, goalY, mode);
     PathNode* node = new PathNode(convertCoordToStr(coords[backtrackPoint]), gCosts[backtrackPoint], h);
     head = addNodeToStart(head, node);
+    }
 
     for (int i = 0; i < openList.size(); i++) {
         delete openList[i];
@@ -226,8 +228,8 @@ PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
     int startY, int goalX, int goalY, int mode) {
     // Implementation goes here
     if (mode == 2) {mode = 3;}
-    int dr[] = {-1, 0, 1, 0, -1, 1, 1, -1};
-    int dc[] = {0, 1, 0, -1, 1, 1, -1, -1};
+    int dr[] = {-1, 0, 0, 1, -1, -1, 1, 1};
+    int dc[] = {0, -1, 1, 0, -1, 1, 1, -1};
     int startR = startX;
     int startC = startY;
     int goalR = goalX;
@@ -287,9 +289,11 @@ PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
 
     int backR = goalR;
     int backC = goalC;
+    int backID = convertCordToId(backR, backC, n);
     PathNode* head = nullptr;
-    while (!(backR == startR && backC == startC)) {
-        int backID = convertCordToId(backR, backC, n);
+    if (parentX[backID] != -1) {
+        while (!(backR == startR && backC == startC)) {
+        backID = convertCordToId(backR, backC, n);
         double h = calculateH(backR, backC, goalR, goalC, mode);
         string name = getName(backR, backC, parentX[backID], parentY[backID]);
         PathNode* node = new PathNode(name, gCosts[backID], h);
@@ -297,6 +301,8 @@ PathNode* findWarehousePath(int warehouse[100][100], int m, int n, int startX,
         backR = parentX[backID];
         backC = parentY[backID];
     }
+    }
+    
 
     for (int i = 0; i < openList.size(); i++) {
         delete openList[i];
@@ -382,6 +388,9 @@ PathNode* findEvacuationPath(int floorPlan[100][100], int m, int n,
 
         int backtrackID = convertCordToId(exitR, exitC, n);
         PathNode* head = nullptr;
+        if (parent[backtrackID] == -1) {
+            
+        }
         while (parent[backtrackID] != -1) {
             int backR = backtrackID / n;
             int backC = backtrackID % n;
