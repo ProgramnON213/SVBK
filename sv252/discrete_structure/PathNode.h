@@ -1,5 +1,8 @@
-// PathNode.h
-#include "main.h"
+#ifndef PATHNODE_H
+#define PATHNODE_H
+
+#include <string>
+using namespace std;
 
 struct PathNode {
     string name;
@@ -14,3 +17,5 @@ struct PathNode {
 };
 
 PathNode* addNodeToStart(PathNode* head, PathNode* node);
+
+#endif

@@ -1,4 +1,6 @@
 #include "Algo.h"
+#include "PathNode.h"
+#include <iostream>
 
 void printPath(PathNode* head);
 void testTask1();

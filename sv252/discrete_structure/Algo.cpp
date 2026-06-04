@@ -1,4 +1,7 @@
 #include "Algo.h"
+#include <fstream>
+#include <cmath>
+#include <algorithm>
 
 // Return the index in list of person with lowest F, if F is equal, return with lowest H
 int findLowestFIndex(vector<PathNode*> list) {
