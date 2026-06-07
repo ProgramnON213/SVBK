@@ -1,4 +1,4 @@
-#include "eniesLobby.h"
+#include "eniesLobbyTest.h"
 using namespace std;
 
 int main(int argc, const char * argv[]) {

@@ -1,4 +1,4 @@
-#include "eniesLobby.h"
+#include "eniesLobbyTest.h"
 // REMINDER: Any time when the target status is considered to increase damage, building will not be affected (looking at you, Zoro)
 // REMINDER: "hạ gục mục tiêu" in description will not change morale in default (+-5) but will activate character effect
 /*
@@ -326,7 +326,7 @@ int Luffy::attack(Building* target, BattleContext& context) {
 int Luffy::calculateSkillDamage(BattleContext& context) {
     int damage = 2 * atk;
     atk += 15;
-    speed += 15;
+    setSpeed(speed + 15);
     int lostHp = multiplyStat(8, maxHp);
     setHPandState(hp - lostHp);
 
@@ -893,7 +893,7 @@ int Lucci::specialSkill(Character* target, BattleContext& context) {
     int damage = multiplyStat(280, atk);
 
     int tempDef = target->getDef();
-    target->setDef(tempDef - multiplyStat(50, tempDef));
+    target->setDef(multiplyStat(50, tempDef));
     target->receiveDamage(damage);
     int realDamage = calculateDamage(damage, target->getDef());
     target->setDef(tempDef);
@@ -1217,10 +1217,8 @@ TowerOfJustice::TowerOfJustice(string name, int hp) : Building(name, hp) {}
 
 void TowerOfJustice::applyEffect(BattleContext& context) {
     // TODO: implement
-    if (!context.robinRescued) {
-        if (context.mainGateDestroyed && !context.robinRescued) {
-            context.setRescueProgress(context.rescueProgress + 5);
-        }
+    if (context.mainGateDestroyed && !context.robinRescued) {
+        context.setRescueProgress(context.rescueProgress + 5);
         if (context.rescueProgress >= 100) {
             context.robinRescued = true;
             context.setMorale(context.morale + 10);
@@ -1238,12 +1236,14 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
     if (context.robinRescued) {
         context.bridgeOpened = true;
         context.setEscapeProgress(context.escapeProgress + 5);
+
+        if (context.escapeProgress >= 100) {
+        // Fight end with STAW_HAT_WIN
+        context.battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN";
     }
-    if (context.escapeProgress >= 100) {
-        // Fight end with STAW_HAT_WIN, see in checkEndCondition
-        // context.battleEnded = true;
-        // context.resultCode = "STRAW_HAT_WIN";
     }
+    
 }
 
 /*
@@ -1255,12 +1255,13 @@ void BusterCallShip::applyEffect(BattleContext& context) {
     // TODO: implement
     if (!isDestroyed()) {
         context.setBusterCallTimer(context.busterCallTimer - 1);
+        if (context.busterCallTimer <= 0) {
+            // Fight end with BUSTER_CALL
+            context.battleEnded = true;
+            context.resultCode = "BUSTER_CALL";
+        }
     }
-    if (context.busterCallTimer <= 0) {
-        // Fight end with BUSTER_CALL
-        context.battleEnded = true;
-        context.resultCode = "BUSTER_CALL";
-    }
+    
 }
 
 void BusterCallShip::onDestroyed(BattleContext& context) {
@@ -1786,6 +1787,7 @@ void BattleContext::logContext() const {
     ", robinRescued=" << robinRescued << ", bridgeOpened=" << bridgeOpened << 
     ", battleEnded=" << battleEnded << ", resultCode=" << resultCode << endl;
     cout << "Logging context completed" << endl;
+    cout << "============================================" << endl;
 }
 
 void EniesLobbyBattle::tempLog() {
